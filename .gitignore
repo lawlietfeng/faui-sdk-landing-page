@@ -24,6 +24,7 @@ dist-ssr
 .trae/
 .claude/
 .DS_Store
+AGENTS.md
 *.suo
 *.ntvs*
 *.njsproj
