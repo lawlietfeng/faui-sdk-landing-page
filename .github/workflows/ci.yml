@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  # 文档同步检查:把 lawlietfeng/faui 拉到 ../faui,跑 sync-docs --check。
+  # 上游 faui/docs 改了 / landing 缺同步时阻塞 PR。
+  # 故意 site-specific 的文档已在 sync-docs.mjs 的 IGNORE_DRIFT / IGNORE_MISSING 列表里。
+  docs-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: faui-landing-page
+      - uses: actions/checkout@v4
+        with:
+          repository: lawlietfeng/faui
+          path: faui
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run sync-docs --check
+        working-directory: faui-landing-page
+        run: node scripts/sync-docs.mjs --check
+
