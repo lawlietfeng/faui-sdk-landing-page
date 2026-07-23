@@ -176,18 +176,16 @@ Typography 属于纯展示型组件，**不需要配置** **`on_change`**，也�
 
 ## 完整示例
 
-一个包含状态文本、标题、链接和一键复制功能的信息展示：
+一个包含状态文本、标题、链接和一键复制功能的卡片信息展示：
 
 ```json
 [
   {
-    "id": "info_box",
+    "id": "info_card",
     "type": "element",
     "config": {
-      "component": "box",
-      "layout": "vertical",
-      "spacing": 12,
-      "padding": 16,
+      "component": "card",
+      "title": "API 密钥信息",
       "children": ["api_title", "api_key_box", "api_help"]
     }
   },
@@ -244,3 +242,4 @@ Typography 属于纯展示型组件，**不需要配置** **`on_change`**，也�
 **Q:** **`items`** **数组里的每一项需要写** **`component: "typography"`** **吗？**
 
 - 不需要。引擎内部会自动将 `items` 数组中的对象当作 `typography` 的配置来解析，你只需要关注 `variant`、`content` 等具体属性即可。
+

@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
-import { Renderer } from '@lawlietfeng/faui';
-import type { ActivitySnapshot, HttpRequestConfig } from '@lawlietfeng/faui';
+import { Renderer } from '@lawlietfeng/faui-sdk/full';
+import type { ActionConfig, ActivitySnapshot, Content, HttpRequestConfig } from '@lawlietfeng/faui-sdk/full';
 import { FauiAgent, TOOL_SYSTEM_PROMPT } from '@lawlietfeng/faui-agent';
 import type { PageSchema } from '@lawlietfeng/faui-agent';
 import { Input, Button, Tabs, message, Collapse, Select } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, CopyOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import sdkSchemaPrompt from '../../../docs/sdk/faui-llm-prompt.md?raw';
+import { validateActivitiesInput } from '../JsonDebug/lib/validateActivities';
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -38,6 +40,33 @@ interface ProviderMeta {
 }
 
 const DEFAULT_PROVIDER = 'anthropic';
+
+const AGENT_SYSTEM_PROMPT = `${TOOL_SYSTEM_PROMPT}
+
+## SDK Schema 规则（优先）
+
+以下内容来自本地 faui-sdk 的 faui-llm-prompt.md，是组件、字段、Action 和数据绑定规则的唯一来源。
+当它与 Agent 的默认 Schema 语义冲突时，以此规则为准；但继续使用上方的工具调用协议。
+Agent 的工具传输对象保持 PageSchema（components + dataModel），宿主会在预览前将其转换为 ActivitySnapshot。
+当前预览使用 Full Edition 注册表，因此 table、list、chart 和 animation 配置可用于预览；其字段仍须遵循 SDK 文档。
+
+${sdkSchemaPrompt}`;
+
+const EXTENDED_ACTION_TYPES = new Set(['copy', 'mcp_tool_call', 'send_prompt', 'input_prompt']);
+
+function pageSchemaToActivities(schema: PageSchema): ActivitySnapshot[] {
+  return [{
+    type: 'ACTIVITY_SNAPSHOT',
+    content: {
+      components: schema.components as unknown as Content['components'],
+      dataModel: schema.dataModel ?? {},
+    },
+  }];
+}
+
+function validatePageSchema(schema: PageSchema) {
+  return validateActivitiesInput(JSON.stringify(pageSchemaToActivities(schema)), 'full');
+}
 
 const SUPPORTED_PROVIDERS: ProviderMeta[] = [
   {
@@ -201,7 +230,17 @@ const httpRequest = async (config: HttpRequestConfig) => {
 };
 
 const MemoizedRenderer = memo(({ schema }: { schema: ActivitySnapshot[] }) => {
-  return <Renderer schema={schema} httpRequest={httpRequest} />;
+  return (
+    <Renderer
+      schema={schema}
+      httpRequest={httpRequest}
+      onAction={(action: ActionConfig) => {
+        if (EXTENDED_ACTION_TYPES.has(action.action)) {
+          message.warning(`Action "${action.action}" 需要宿主注册执行器，当前预览不会执行它。`);
+        }
+      }}
+    />
+  );
 }, (prevProps, nextProps) => {
   return JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
 });
@@ -229,18 +268,20 @@ export default function AgentDemo() {
 
   useEffect(() => {
     if (currentConversation?.schema) {
-      const snapshot: ActivitySnapshot[] = [{
-        type: 'ACTIVITY_SNAPSHOT',
-        content: {
-          components: currentConversation.schema.components as any,
-          dataModel: currentConversation.schema.dataModel ?? {},
-        },
-      }];
-      setCurrentSchema(snapshot);
-      setCurrentPageSchema(currentConversation.schema);
+      const validation = validatePageSchema(currentConversation.schema);
+      if (validation.canRender) {
+        setCurrentSchema(validation.activities as ActivitySnapshot[]);
+        setCurrentPageSchema(currentConversation.schema);
+        setPreviewError(null);
+      } else {
+        setCurrentSchema([]);
+        setCurrentPageSchema(null);
+        setPreviewError(`历史 Schema 无法在 Full Edition 预览：${validation.issues[0]?.message ?? '结构无效'}`);
+      }
     } else {
       setCurrentSchema([]);
       setCurrentPageSchema(null);
+      setPreviewError(null);
     }
   }, [currentConversationId, currentConversation?.schema]);
 
@@ -248,6 +289,7 @@ export default function AgentDemo() {
   const [loading, setLoading] = useState(false);
   const [currentSchema, setCurrentSchema] = useState<ActivitySnapshot[]>([]);
   const [currentPageSchema, setCurrentPageSchema] = useState<PageSchema | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const conversationsRef = useRef(conversations);
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
@@ -333,6 +375,7 @@ export default function AgentDemo() {
     setCurrentConversationId(newConv.id);
     setCurrentSchema([]);
     setCurrentPageSchema(null);
+    setPreviewError(null);
   }, []);
 
   const deleteConversation = useCallback((id: string) => {
@@ -341,6 +384,7 @@ export default function AgentDemo() {
       setCurrentConversationId(null);
       setCurrentSchema([]);
       setCurrentPageSchema(null);
+      setPreviewError(null);
     }
   }, [currentConversationId]);
 
@@ -408,7 +452,7 @@ export default function AgentDemo() {
             apiKey: config.apiKey,
             baseUrl: config.baseUrl || undefined,
             useTools: true,
-            systemPrompt: TOOL_SYSTEM_PROMPT,
+            systemPrompt: AGENT_SYSTEM_PROMPT,
           }),
           configKey,
         };
@@ -462,16 +506,19 @@ export default function AgentDemo() {
         } else if (event.type === 'tool_use') {
           updateStatus(`🔧 ${event.name}`);
         } else if (event.type === 'schema_updated') {
-          const snapshot: ActivitySnapshot[] = [{
-            type: 'ACTIVITY_SNAPSHOT',
-            content: {
-              components: event.schema.components as any,
-              dataModel: event.schema.dataModel ?? {},
-            },
-          }];
-          setCurrentSchema(snapshot);
-          setCurrentPageSchema(event.schema);
-          updateConversationMessages(convId!, conv.messages, event.schema);
+          const validation = validatePageSchema(event.schema);
+          if (validation.canRender) {
+            setCurrentSchema(validation.activities as ActivitySnapshot[]);
+            setCurrentPageSchema(event.schema);
+            setPreviewError(null);
+            updateConversationMessages(convId!, conv.messages, event.schema);
+          } else {
+            const detail = validation.issues[0]?.message ?? '结构无效';
+            setCurrentSchema([]);
+            setCurrentPageSchema(null);
+            setPreviewError(`生成的 Schema 无法在 Full Edition 预览：${detail}`);
+            updateStatus(`⚠️ Schema 校验失败：${detail}`);
+          }
         } else if (event.type === 'done') {
           const { schema, turns } = event.result;
           const componentCount = schema.components.length;
@@ -479,15 +526,16 @@ export default function AgentDemo() {
           console.log('生成完成 - 轮次:', turns, '组件数:', componentCount);
 
           if (componentCount > 0) {
-            const snapshot: ActivitySnapshot[] = [{
-              type: 'ACTIVITY_SNAPSHOT',
-              content: {
-                components: schema.components as any,
-                dataModel: schema.dataModel ?? {},
-              },
-            }];
-            setCurrentSchema(snapshot);
-            setCurrentPageSchema(schema);
+            const validation = validatePageSchema(schema);
+            if (validation.canRender) {
+              setCurrentSchema(validation.activities as ActivitySnapshot[]);
+              setCurrentPageSchema(schema);
+              setPreviewError(null);
+            } else {
+              setCurrentSchema([]);
+              setCurrentPageSchema(null);
+              setPreviewError(`生成的 Schema 无法在 Full Edition 预览：${validation.issues[0]?.message ?? '结构无效'}`);
+            }
           }
 
           const finalMessages = [...conv.messages];
@@ -496,8 +544,13 @@ export default function AgentDemo() {
           } else {
             finalMessages.push({ role: 'system', content: `✅ 生成完成 — ${componentCount} 个组件，${turns} 轮对话` });
           }
-          updateConversationMessages(convId!, finalMessages, componentCount > 0 ? schema : null);
-          message.success('页面生成成功！');
+          const finalValidation = componentCount > 0 ? validatePageSchema(schema) : null;
+          updateConversationMessages(convId!, finalMessages, finalValidation?.canRender ? schema : null);
+          if (finalValidation?.canRender) {
+            message.success('页面生成成功！');
+          } else if (componentCount > 0) {
+            message.warning('页面已生成，但未通过 Full Edition 预览校验。');
+          }
         } else if (event.type === 'error') {
           console.error('生成错误:', event.message);
           updateConversationMessages(convId!, [...conv.messages, { role: 'system', content: `❌ 错误：${event.message}` }]);
@@ -692,6 +745,10 @@ export default function AgentDemo() {
                   {currentSchema.length > 0 ? (
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 min-h-[200px]">
                       <MemoizedRenderer schema={currentSchema} />
+                    </div>
+                  ) : previewError ? (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                      {previewError}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-sm">

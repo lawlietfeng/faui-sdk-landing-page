@@ -1,80 +1,194 @@
-// 加载所有 ./docs/**/*.md (Vite 构建时静态注入),归一成 routes / guides / components 三块。
-import { DOCUMENTED_FORM_COMPONENTS } from '../componentCategories';
+import { ComponentRegistry as FormComponentRegistry } from '@lawlietfeng/faui-sdk';
+import { ComponentRegistry as FullComponentRegistry } from '@lawlietfeng/faui-sdk/full';
+import {
+  componentCategories,
+  componentRegistryNamesByDocSlug,
+  documentedComponentSlugs,
+} from '../componentCategories';
 
-const markdownModules = import.meta.glob([
-  '../../../../docs/**/*.md',
-  '!../../../../docs/components/{affix,anchor,avatar,badge,card,carousel,chart,collapse,descriptions,dropdown,empty,floatbutton,image,list,menu,pagination,qrcode,statistic,stepindicator,steps,table,tabs,timeline,tour,tree,watermark}.md',
-], {
+const markdownModules = import.meta.glob('../../../../docs/{sdk,site}/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 });
 
-// 顶层指南的展示顺序与友好标题。未在此列出的指南会按文件名追加到末尾。
-export const GUIDE_ORDER: { slug: string; label: string }[] = [
-  { slug: 'npm-usage', label: 'NPM 使用指南' },
-  { slug: 'http-request', label: 'HTTP 请求与后端中转' },
-  { slug: 'form-guide', label: 'Form 表单完整指南' },
-  { slug: 'lifecycle', label: '组件与 Action 生命周期' },
-  { slug: 'lifecycle-types', label: 'Activity 类型与 JSON Patch' },
-];
+const QUICK_START = [
+  ['sdk/README', '文档首页'],
+  ['sdk/npm-usage', 'SDK 使用指南'],
+  ['sdk/form-guide', 'Form 表单指南'],
+  ['sdk/external-submit', '外部校验与提交'],
+  ['sdk/lifecycle-types', 'Activity 与 JSON Patch'],
+  ['sdk/animation', 'Animation'],
+] as const;
 
-// 默认落地页:第一篇有效的指南 slug。如果上线时改顺序,这里也跟着改。
-export const DEFAULT_GUIDE_SLUG = 'npm-usage';
+const ACTIONS = [
+  ['sdk/actions/README', 'Actions 总览'],
+  ['sdk/actions/update_data', 'update_data'],
+  ['sdk/actions/http_proxy', 'http_proxy'],
+  ['sdk/actions/message', 'message'],
+  ['sdk/actions/notification', 'notification'],
+  ['sdk/actions/copy', 'copy'],
+  ['sdk/actions/mcp_tool_call', 'mcp_tool_call'],
+  ['sdk/actions/send_prompt', 'send_prompt'],
+  ['sdk/actions/input_prompt', 'input_prompt'],
+] as const;
+
+const ADVANCED = [
+  ['sdk/development', '开发者指南'],
+  ['sdk/component-doc-standard', '组件文档规范'],
+  ['sdk/faui-llm-prompt', 'LLM Prompt'],
+] as const;
+
+const SITE_GUIDES = [
+  ['site/http-request', 'HTTP 请求与后端中转'],
+  ['site/lifecycle', '组件与 Action 生命周期'],
+] as const;
+
+export type ComponentAvailability = 'form-full' | 'full';
 
 export interface DocRoute {
   path: string;
+  documentPath: string;
+  source: 'sdk' | 'site';
   content: string;
+  label: string;
+  title: string;
+  availability?: ComponentAvailability;
 }
 
-export interface GuideItem {
+export interface DocNavigationItem {
+  path: string;
+  label: string;
+  availability?: ComponentAvailability;
+}
+
+export interface DocNavigationSection {
   key: string;
   label: string;
+  items?: DocNavigationItem[];
+  categories?: Array<{
+    key: string;
+    label: string;
+    items: DocNavigationItem[];
+  }>;
 }
 
-export function processDocs(): {
-  guideItems: GuideItem[];
-  componentDocs: Map<string, string>;
+export interface DocumentationModel {
   routes: DocRoute[];
-} {
-  const guideMap = new Map<string, GuideItem>();
-  const componentDocs = new Map<string, string>();
-  const routes: DocRoute[] = [];
+  navigation: DocNavigationSection[];
+}
 
-  for (const filePath in markdownModules) {
-    const content = markdownModules[filePath] as string;
-    const cleanPath = filePath.replace('../../../../docs/', '').replace('.md', '');
-    const segments = cleanPath.split('/');
-    const routePath = `/${cleanPath}`;
+export const DEFAULT_DOC_PATH = '/sdk/README';
 
-    if (segments.length === 1) {
-      const slug = segments[0];
-      routes.push({ path: routePath, content });
-      const titled = GUIDE_ORDER.find((g) => g.slug === slug);
-      guideMap.set(slug, {
-        key: routePath,
-        label: titled?.label ?? slug.charAt(0).toUpperCase() + slug.slice(1),
-      });
-    } else if (segments[0] === 'components') {
-      const componentSlug = segments[1];
-      if (DOCUMENTED_FORM_COMPONENTS.has(componentSlug)) {
-        routes.push({ path: routePath, content });
-        componentDocs.set(componentSlug, routePath);
-      }
-    }
+function getTitle(content: string, fallback: string): string {
+  const heading = content.match(/^#\s+(.+)$/m)?.[1]?.trim();
+  return heading?.replaceAll('`', '') || fallback;
+}
+
+function getAvailability(componentSlug: string): ComponentAvailability {
+  const registryNames = componentRegistryNamesByDocSlug[componentSlug] ?? [componentSlug];
+  const existsInForm = registryNames.every((name) => name in FormComponentRegistry);
+  const existsInFull = registryNames.every((name) => name in FullComponentRegistry);
+
+  if (!existsInFull) {
+    throw new Error(`SDK component document "${componentSlug}" has no matching Full Edition registry entry.`);
   }
 
-  // 按 GUIDE_ORDER 显式排序,未列出的按字母序追加在后面,避免依赖 import.meta.glob 的迭代顺序。
-  const ordered: GuideItem[] = [];
-  for (const { slug } of GUIDE_ORDER) {
-    const item = guideMap.get(slug);
-    if (item) {
-      ordered.push(item);
-      guideMap.delete(slug);
-    }
-  }
-  const remaining = Array.from(guideMap.values()).sort((a, b) => a.key.localeCompare(b.key));
-  const guideItems = [...ordered, ...remaining];
+  return existsInForm ? 'form-full' : 'full';
+}
 
-  return { guideItems, componentDocs, routes };
+function createItem(routes: Map<string, DocRoute>, key: string, label: string): DocNavigationItem {
+  const route = routes.get(key);
+  if (!route) {
+    throw new Error(`Missing configured documentation route: ${key}`);
+  }
+
+  route.label = label;
+  return { path: route.path, label, availability: route.availability };
+}
+
+export function processDocs(): DocumentationModel {
+  const routesByKey = new Map<string, DocRoute>();
+
+  for (const [modulePath, moduleContent] of Object.entries(markdownModules)) {
+    const match = modulePath.match(/docs\/(sdk|site)\/(.+)\.md$/);
+    if (!match) {
+      continue;
+    }
+
+    const [, source, documentPath] = match;
+    const key = `${source}/${documentPath}`;
+    const componentMatch = source === 'sdk' ? documentPath.match(/^components\/([^/]+)$/) : null;
+    const componentSlug = componentMatch?.[1];
+    const availability = componentSlug ? getAvailability(componentSlug) : undefined;
+    const fallbackLabel = componentSlug ?? documentPath.split('/').at(-1) ?? key;
+    const content = moduleContent as string;
+
+    routesByKey.set(key, {
+      path: `/${key}`,
+      documentPath,
+      source: source as 'sdk' | 'site',
+      content,
+      label: fallbackLabel,
+      title: getTitle(content, fallbackLabel),
+      availability,
+    });
+  }
+
+  const componentDocumentKeys = [...documentedComponentSlugs]
+    .map((slug) => `sdk/components/${slug}`)
+    .sort((left, right) => left.localeCompare(right));
+  const configuredDocumentKeys = new Set([
+    ...QUICK_START.map(([key]) => key),
+    ...ACTIONS.map(([key]) => key),
+    ...ADVANCED.map(([key]) => key),
+    ...SITE_GUIDES.map(([key]) => key),
+    ...componentDocumentKeys,
+  ]);
+  const missingConfigured = [...configuredDocumentKeys].filter((key) => !routesByKey.has(key));
+  const unlistedDocuments = [...routesByKey.keys()].filter((key) => !configuredDocumentKeys.has(key));
+
+  if (missingConfigured.length > 0 || unlistedDocuments.length > 0) {
+    throw new Error(
+      `Documentation navigation is incomplete. Missing: ${missingConfigured.join(', ') || 'none'}; `
+      + `unlisted: ${unlistedDocuments.join(', ') || 'none'}.`,
+    );
+  }
+
+  const componentNavigationCategories = componentCategories.map((category) => ({
+    key: category.key,
+    label: category.label,
+    items: category.children.map((slug) => createItem(routesByKey, `sdk/components/${slug}`, slug)),
+  }));
+
+  const navigation: DocNavigationSection[] = [
+    {
+      key: 'quick-start',
+      label: '快速开始',
+      items: QUICK_START.map(([key, label]) => createItem(routesByKey, key, label)),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      items: ACTIONS.map(([key, label]) => createItem(routesByKey, key, label)),
+    },
+    {
+      key: 'components',
+      label: '组件',
+      categories: componentNavigationCategories,
+    },
+    {
+      key: 'advanced',
+      label: '进阶',
+      items: ADVANCED.map(([key, label]) => createItem(routesByKey, key, label)),
+    },
+    {
+      key: 'site-guides',
+      label: '站点指南',
+      items: SITE_GUIDES.map(([key, label]) => createItem(routesByKey, key, label)),
+    },
+  ];
+
+  const routes = [...routesByKey.values()].sort((left, right) => left.path.localeCompare(right.path));
+  return { routes, navigation };
 }

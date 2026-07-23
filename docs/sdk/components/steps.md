@@ -101,7 +101,7 @@
 
 ```json
 {
-  "id": "steps-demo",
+  "id": "full-steps-demo",
   "component": "steps",
   "progressDot": true,
   "size": "small",

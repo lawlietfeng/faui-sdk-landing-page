@@ -1,8 +1,10 @@
-import { ComponentRegistry } from '@lawlietfeng/faui';
-import type { Activity } from '@lawlietfeng/faui';
+import { ComponentRegistry as FormComponentRegistry } from '@lawlietfeng/faui-sdk';
+import { ComponentRegistry as FullComponentRegistry } from '@lawlietfeng/faui-sdk/full';
+import type { Activity } from '@lawlietfeng/faui-sdk';
 
 export type DebugIssueSeverity = 'error' | 'warning';
 export type DebugIssueCategory = 'json' | 'activity' | 'schema' | 'registry';
+export type DebugEdition = 'form' | 'full';
 
 export interface DebugIssue {
   severity: DebugIssueSeverity;
@@ -16,9 +18,18 @@ export interface DebugResult {
   issues: DebugIssue[];
   formattedJson: string;
   canRender: boolean;
+  edition: DebugEdition;
 }
 
-const FORM_COMPONENT_TYPES = new Set(Object.keys(ComponentRegistry));
+const componentTypesByEdition: Record<DebugEdition, Set<string>> = {
+  form: new Set(Object.keys(FormComponentRegistry)),
+  full: new Set(Object.keys(FullComponentRegistry)),
+};
+
+const editionLabel: Record<DebugEdition, string> = {
+  form: 'Form Edition',
+  full: 'Full Edition',
+};
 
 function createIssue(
   severity: DebugIssueSeverity,
@@ -77,6 +88,7 @@ function validateSnapshotContent(
   content: Record<string, unknown>,
   snapshotIndex: number,
   issues: DebugIssue[],
+  edition: DebugEdition,
 ) {
   const components = content.components;
   const componentsLocation = `$[${snapshotIndex}].content.components`;
@@ -129,8 +141,8 @@ function validateSnapshotContent(
       issues.push(
         createIssue('error', 'schema', '组件缺少 component 字段。', `${location}.component`),
       );
-    } else if (!FORM_COMPONENT_TYPES.has(componentType)) {
-      const message = `组件 "${componentId || `索引 ${componentIndex}`}" 使用了当前表单站点不支持的组件类型 "${componentType}"。`;
+    } else if (!componentTypesByEdition[edition].has(componentType)) {
+      const message = `组件 "${componentId || `索引 ${componentIndex}`}" 使用了 ${editionLabel[edition]} 不支持的组件类型 "${componentType}"。`;
       issues.push(
         createIssue('error', 'registry', message, `${location}.component`),
       );
@@ -188,7 +200,38 @@ function validateSnapshotContent(
   }
 }
 
-export function validateActivitiesInput(rawInput: string): DebugResult {
+function validatePatchOperation(
+  patch: unknown,
+  location: string,
+  issues: DebugIssue[],
+) {
+  if (!isRecord(patch)) {
+    issues.push(createIssue('error', 'activity', 'JSON Patch 操作必须是对象。', location));
+    return;
+  }
+
+  const operation = patch.op;
+  const path = patch.path;
+  const validOperations = new Set(['add', 'remove', 'replace', 'move', 'copy', 'test']);
+
+  if (typeof operation !== 'string' || !validOperations.has(operation)) {
+    issues.push(createIssue('error', 'activity', 'JSON Patch.op 必须是 add、remove、replace、move、copy 或 test。', `${location}.op`));
+  }
+
+  if (typeof path !== 'string' || !path.startsWith('/')) {
+    issues.push(createIssue('error', 'activity', 'JSON Patch.path 必须是以 / 开头的字符串。', `${location}.path`));
+  }
+
+  if ((operation === 'move' || operation === 'copy') && (typeof patch.from !== 'string' || !patch.from.startsWith('/'))) {
+    issues.push(createIssue('error', 'activity', `JSON Patch.${String(operation)} 必须提供以 / 开头的 from。`, `${location}.from`));
+  }
+
+  if ((operation === 'add' || operation === 'replace' || operation === 'test') && !('value' in patch)) {
+    issues.push(createIssue('error', 'activity', `JSON Patch.${String(operation)} 必须提供 value。`, `${location}.value`));
+  }
+}
+
+export function validateActivitiesInput(rawInput: string, edition: DebugEdition = 'form'): DebugResult {
   const trimmedInput = rawInput.trim();
 
   if (!trimmedInput) {
@@ -199,6 +242,7 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
       ],
       formattedJson: '',
       canRender: false,
+      edition,
     };
   }
 
@@ -219,6 +263,7 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
       ],
       formattedJson: '',
       canRender: false,
+      edition,
     };
   }
 
@@ -233,6 +278,7 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
       ],
       formattedJson,
       canRender: false,
+      edition,
     };
   }
 
@@ -291,6 +337,10 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
             `${location}.patch`,
           ),
         );
+      } else {
+        activity.patch.forEach((patch, patchIndex) => {
+          validatePatchOperation(patch, `${location}.patch[${patchIndex}]`, issues);
+        });
       }
       return;
     }
@@ -310,7 +360,7 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
       createIssue('error', 'activity', '缺少 ACTIVITY_SNAPSHOT。', '$'),
     );
   } else if (firstSnapshotContent) {
-    validateSnapshotContent(firstSnapshotContent, firstSnapshotIndex, issues);
+    validateSnapshotContent(firstSnapshotContent, firstSnapshotIndex, issues, edition);
   }
 
   const sortedIssues = sortIssues(issues);
@@ -321,5 +371,6 @@ export function validateActivitiesInput(rawInput: string): DebugResult {
     issues: sortedIssues,
     formattedJson,
     canRender,
+    edition,
   };
 }

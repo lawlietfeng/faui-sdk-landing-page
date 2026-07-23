@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { Menu, Input, Button } from 'antd';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { SearchOutlined } from '@ant-design/icons';
-import { componentCategories } from './componentCategories';
-import { processDocs, DEFAULT_GUIDE_SLUG } from './lib/processDocs';
+import { processDocs, DEFAULT_DOC_PATH } from './lib/processDocs';
 import { buildMenuItems } from './lib/buildMenuItems';
 import { DocViewer } from './components/DocViewer';
 
@@ -43,21 +42,24 @@ export default function Docs() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const { guideItems, componentDocs, routes } = useMemo(() => processDocs(), []);
+  const documentation = useMemo(() => processDocs(), []);
+  const { navigation, routes } = documentation;
 
   const menuItems = useMemo(
-    () => buildMenuItems(guideItems, componentDocs, searchQuery),
-    [guideItems, componentDocs, searchQuery],
+    () => buildMenuItems(documentation, searchQuery),
+    [documentation, searchQuery],
   );
 
-  const defaultPath =
-    guideItems.find((g) => g.key === `/${DEFAULT_GUIDE_SLUG}`)?.key
-    ?? guideItems[0]?.key
-    ?? '';
+  const defaultPath = routes.some((route) => route.path === DEFAULT_DOC_PATH)
+    ? DEFAULT_DOC_PATH
+    : routes[0]?.path ?? '';
   const currentPath = location.pathname.replace('/docs', '');
   const selectedKeys = [currentPath === '' || currentPath === '/' ? defaultPath : currentPath];
 
-  const defaultOpenKeys = componentCategories.map((c) => c.key);
+  const defaultOpenKeys = navigation.flatMap((section) => [
+    section.key,
+    ...(section.categories?.map((category) => category.key) ?? []),
+  ]);
 
   return (
     <div className="flex h-full w-full bg-white dark:bg-[#121212] overflow-hidden pt-16">
@@ -65,7 +67,7 @@ export default function Docs() {
       <aside className="w-[280px] shrink-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto bg-white dark:bg-[#121212] flex flex-col">
         <div className="px-4 pt-4 pb-2">
           <Input
-            placeholder="搜索组件..."
+            placeholder="搜索文档..."
             prefix={<SearchOutlined className="text-gray-400" />}
             allowClear
             value={searchQuery}
@@ -91,7 +93,7 @@ export default function Docs() {
               <Route
                 key={route.path}
                 path={route.path}
-                element={<DocViewer content={route.content} />}
+                element={<DocViewer route={route} />}
               />
             ))}
             <Route path="/" element={<Navigate to={`/docs${defaultPath}`} replace />} />

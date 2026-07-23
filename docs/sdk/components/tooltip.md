@@ -118,15 +118,15 @@
       "placement": "bottomRight",
       "trigger": "click",
       "color": "blue",
-      "children": ["user_button"]
+      "children": ["user_avatar"]
     }
   },
   {
-    "id": "user_button",
+    "id": "user_avatar",
     "type": "element",
     "config": {
-      "component": "button",
-      "label": "${/userName}"
+      "component": "avatar",
+      "text": "${/userName}"
     }
   }
 ]
@@ -142,4 +142,4 @@
 - 引擎已经自动在 Tooltip 的 `children` 外部包裹了一层 `<span style="display: inline-block;">`。通常情况下，这足以让被禁用的按钮也能触发 Tooltip。如果仍然无法触发，建议将被禁用的按钮放入一个普通的 `box` 容器中，并将该 `box` 作为 Tooltip 的 `children`。
 
 **Q: Tooltip 的内容支持渲染复杂的组件结构吗？**
-- 不支持。`tooltip` 的 `title` 属性仅支持纯文本（可使用 `${}` 插值）。如果你需要更长的提示内容，请改用 `popover` 组件。
+- 不支持。`tooltip` 的 `title` 属性仅支持纯文本（可使用 `${}` 插值）。如果你需要在气泡框内渲染按钮、表格等复杂的组件结构，请改用 `popover`（气泡卡片）组件。

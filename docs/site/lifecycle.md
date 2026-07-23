@@ -1,6 +1,6 @@
 # 组件与 Action 生命周期
 
-FAUI 当前提供一个组件生命周期钩子和两个 Action 回调。`ACTIVITY_SNAPSHOT`、`ACTIVITY_DELTA` 是 `Renderer` 的输入数据类型，不是组件生命周期；它们的格式和 JSON Patch 用法见[Activity 类型与 JSON Patch](/docs/lifecycle-types)。
+FAUI 当前提供一个组件生命周期钩子和两个 Action 回调。`ACTIVITY_SNAPSHOT`、`ACTIVITY_DELTA` 是 `Renderer` 的输入数据类型，不是组件生命周期；它们的格式和 JSON Patch 用法见[Activity 类型与 JSON Patch](/docs/sdk/lifecycle-types)。
 
 ## 1. 支持范围
 
@@ -106,5 +106,5 @@ Action 执行成功后进入 `on_success`；执行过程中抛出错误后进入
 
 ## 6. 相关文档
 
-- [HTTP 请求与后端中转](/docs/http-request)：`http_proxy` 与 `httpRequest` 的配置。
-- [Activity 类型与 JSON Patch](/docs/lifecycle-types)：`ACTIVITY_SNAPSHOT`、`ACTIVITY_DELTA` 和增量更新。
+- [HTTP 请求与后端中转](/docs/site/http-request)：`http_proxy` 与 `httpRequest` 的配置。
+- [Activity 类型与 JSON Patch](/docs/sdk/lifecycle-types)：`ACTIVITY_SNAPSHOT`、`ACTIVITY_DELTA` 和增量更新。

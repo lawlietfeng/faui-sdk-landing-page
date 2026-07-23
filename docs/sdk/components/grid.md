@@ -1,11 +1,11 @@
 # grid 栅格布局组件
 
-`row` 和 `col` 组合构成了基于 24 栅格的系统布局。它们通常用于将页面划分为等宽或按比例划分的多个列，适合构建表单、信息面板或响应式页面框架。
+`row` 和 `col` 组合构成了基于 24 栅格的系统布局。它们通常用于将页面划分为等宽或按比例划分的多个列，适合构建表单、仪表盘卡片或响应式页面框架。
 
 ## 适用场景
 
 - **表单布局**：将复杂的表单项划分为 2 列或 3 列显示。
-- **信息展示**：在详情页中将多项数据左右排列。
+- **信息展示**：在详情页（如 `descriptions` 的替代）将多项数据左右排列。
 - **响应式页面**：通过搭配不同的 `span` 值实现网格化页面布局。
 
 ## Row (行) 核心属性
@@ -179,7 +179,7 @@ FAUI 的栅格系统完整支持 Ant Design 6 大响应式断点，让 AI 生成
 
 ### 响应式完整示例
 
-三列信息面板布局：手机单列、平板双列、桌面三列。
+三列卡片布局：手机单列、平板双列、桌面三列。
 
 ```json
 [
@@ -192,51 +192,48 @@ FAUI 的栅格系统完整支持 Ant Design 6 大响应式断点，让 AI 生成
     "id": "responsive-row",
     "component": "row",
     "gutter": [16, 16],
-    "children": ["panel-col-1", "panel-col-2", "panel-col-3"]
+    "children": ["card-col-1", "card-col-2", "card-col-3"]
   },
   {
-    "id": "panel-col-1",
+    "id": "card-col-1",
     "component": "col",
     "xs": 24,
     "sm": 12,
     "lg": 8,
-    "children": ["panel-1"]
+    "children": ["card-1"]
   },
   {
-    "id": "panel-col-2",
+    "id": "card-col-2",
     "component": "col",
     "xs": 24,
     "sm": 12,
     "lg": 8,
-    "children": ["panel-2"]
+    "children": ["card-2"]
   },
   {
-    "id": "panel-col-3",
+    "id": "card-col-3",
     "component": "col",
     "xs": 24,
     "sm": 12,
     "lg": 8,
-    "children": ["panel-3"]
+    "children": ["card-3"]
   },
   {
-    "id": "panel-1",
-    "component": "box",
-    "padding": 16,
-    "style": { "border": "1px solid #d9d9d9", "borderRadius": 8 },
+    "id": "card-1",
+    "component": "card",
+    "title": "卡片一",
     "children": ["text-1"]
   },
   {
-    "id": "panel-2",
-    "component": "box",
-    "padding": 16,
-    "style": { "border": "1px solid #d9d9d9", "borderRadius": 8 },
+    "id": "card-2",
+    "component": "card",
+    "title": "卡片二",
     "children": ["text-2"]
   },
   {
-    "id": "panel-3",
-    "component": "box",
-    "padding": 16,
-    "style": { "border": "1px solid #d9d9d9", "borderRadius": 8 },
+    "id": "card-3",
+    "component": "card",
+    "title": "卡片三",
     "children": ["text-3"]
   },
   { "id": "text-1", "component": "text", "content": "手机单列 → 平板双列 → 桌面三列" },

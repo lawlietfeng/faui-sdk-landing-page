@@ -1,14 +1,23 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
+import type { DocRoute } from '../lib/processDocs';
+import { isExternalDocLink, resolveDocLink } from '../lib/resolveDocLink';
 
 interface DocViewerProps {
-  content: string;
+  route: DocRoute;
 }
 
-export function DocViewer({ content }: DocViewerProps) {
+export function DocViewer({ route }: DocViewerProps) {
   return (
     <div className="max-w-[860px] mx-auto py-10 px-6 text-gray-900 dark:text-gray-100 text-base leading-relaxed">
+      {route.availability && (
+        <div className="mb-5 flex items-center gap-2 text-sm">
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-medium text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+            {route.availability === 'form-full' ? 'Form / Full Edition' : 'Full Edition'}
+          </span>
+        </div>
+      )}
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -19,14 +28,30 @@ export function DocViewer({ content }: DocViewerProps) {
           ul: (props) => <ul className="mb-4 pl-6 list-disc text-gray-700 dark:text-gray-300" {...props} />,
           ol: (props) => <ol className="mb-4 pl-6 list-decimal text-gray-700 dark:text-gray-300" {...props} />,
           li: (props) => <li className="mb-2" {...props} />,
-          a: (props) => <a className="text-[#1677ff] hover:underline" {...props} />,
-          table: (props) => <table className="w-full mb-6 border-collapse" {...props} />,
+          a: ({ href = '', ...props }) => {
+            const resolvedHref = resolveDocLink(href, route);
+            const external = isExternalDocLink(resolvedHref);
+            return (
+              <a
+                {...props}
+                className="text-[#1677ff] hover:underline"
+                href={resolvedHref}
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener noreferrer' : undefined}
+              />
+            );
+          },
+          table: (props) => (
+            <div className="mb-6 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full border-collapse" {...props} />
+            </div>
+          ),
           th: (props) => <th className="p-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-left font-semibold text-gray-900 dark:text-gray-200" {...props} />,
           td: (props) => <td className="p-3 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300" {...props} />,
           code: CodeBlock,
         }}
       >
-        {content}
+        {route.content}
       </ReactMarkdown>
     </div>
   );

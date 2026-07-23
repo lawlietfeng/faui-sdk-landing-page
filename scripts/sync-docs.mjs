@@ -1,164 +1,154 @@
 #!/usr/bin/env node
-// 对比 ../faui/docs (上游) 与本仓库 docs/ 的差异,输出报告。
-// 用途:
-//   node scripts/sync-docs.mjs              输出差异报告
-//   node scripts/sync-docs.mjs --check      有差异时退出码 1 (CI 用)
-//   node scripts/sync-docs.mjs --json       JSON 输出 (脚本消费)
+// 将 ../faui-sdk/docs 完整镜像到 docs/sdk，或检查镜像是否与上游一致。
 //
-// 不会写入文件。同步要么手动 cp,要么走 T13 方案 (faui 包里直接带 docs)。
+//   npm run sync-docs         写入镜像
+//   npm run sync-docs:check   只检查，任意 missing / drift / extra 均失败
+//   node scripts/sync-docs.mjs --json
 
-import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const LANDING_DOCS = join(__dirname, '..', 'docs');
-const UPSTREAM_DOCS = join(__dirname, '..', '..', 'faui', 'docs');
-
-// 上游 faui/docs 里这些文档不该出现在 landing(actions 服务端语义、dev/llm 内部用),
-// 缺失它们不算 missing,不阻塞 CI。
-const IGNORE_MISSING = [
-  /^actions\//,
-  /^animation\.md$/,
-  /^component-doc-standard\.md$/,
-  /^development\.md$/,
-  /^faui-llm-prompt\.md$/,
-];
-
-// 这些 landing 文档是 site-specific 改写过的。允许它们和上游不同,内容漂移不阻塞 CI。
-const IGNORE_DRIFT = [
-  /^npm-usage\.md$/,
-  /^form-guide\.md$/,
-  /^lifecycle-types\.md$/,
-  /^components\/chart\.md$/,
-  /^components\/condition\.md$/,
-  /^components\/repeater\.md$/,
-];
+const SDK_ROOT = join(__dirname, '..', '..', 'faui-sdk');
+const UPSTREAM_DOCS = join(SDK_ROOT, 'docs');
+const MIRROR_DOCS = join(__dirname, '..', 'docs', 'sdk');
 
 const args = new Set(process.argv.slice(2));
 const CHECK = args.has('--check');
 const JSON_MODE = args.has('--json');
+const WRITE = !CHECK || args.has('--write');
 
 function walk(root) {
-  const out = new Map();
-  if (!existsSync(root)) return out;
-  function rec(dir) {
-    for (const name of readdirSync(dir)) {
-      const filePath = join(dir, name);
-      const st = statSync(filePath);
-      if (st.isDirectory()) rec(filePath);
-      else if (name.endsWith('.md')) {
-        out.set(relative(root, filePath), readFileSync(filePath, 'utf8'));
+  const files = new Map();
+
+  function visit(directory) {
+    for (const name of readdirSync(directory).sort((left, right) => left.localeCompare(right))) {
+      const filePath = join(directory, name);
+      const fileInfo = statSync(filePath);
+      if (fileInfo.isDirectory()) {
+        visit(filePath);
+      } else if (name.endsWith('.md')) {
+        files.set(relative(root, filePath), filePath);
       }
     }
   }
-  rec(root);
-  return out;
+
+  visit(root);
+  return files;
 }
 
-function hash(s) {
-  // 简单字符串签名,只用来比较是否完全相同
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
-  return h.toString(36);
+function getSdkCommit() {
+  try {
+    return execFileSync('git', ['-C', SDK_ROOT, 'rev-parse', '--short', 'HEAD'], {
+      encoding: 'utf8',
+    }).trim();
+  } catch {
+    return 'unknown';
+  }
 }
 
-function isIgnoredMissing(path) {
-  return IGNORE_MISSING.some((re) => re.test(path));
+function removeEmptyDirectories(directory) {
+  for (const name of readdirSync(directory)) {
+    const filePath = join(directory, name);
+    if (statSync(filePath).isDirectory()) {
+      removeEmptyDirectories(filePath);
+      if (readdirSync(filePath).length === 0) {
+        rmSync(filePath, { recursive: true, force: true });
+      }
+    }
+  }
 }
 
-function isIgnoredDrift(path) {
-  return IGNORE_DRIFT.some((re) => re.test(path));
+if (!existsSync(UPSTREAM_DOCS) || !statSync(UPSTREAM_DOCS).isDirectory()) {
+  throw new Error(`Local FAUI SDK docs are unavailable: ${UPSTREAM_DOCS}`);
+}
+
+if (WRITE) {
+  mkdirSync(MIRROR_DOCS, { recursive: true });
+  const upstreamBeforeWrite = walk(UPSTREAM_DOCS);
+  const mirrorBeforeWrite = walk(MIRROR_DOCS);
+
+  for (const [docPath, sourcePath] of upstreamBeforeWrite) {
+    const targetPath = join(MIRROR_DOCS, docPath);
+    mkdirSync(dirname(targetPath), { recursive: true });
+    copyFileSync(sourcePath, targetPath);
+  }
+
+  for (const docPath of mirrorBeforeWrite.keys()) {
+    if (!upstreamBeforeWrite.has(docPath)) {
+      rmSync(join(MIRROR_DOCS, docPath), { force: true });
+    }
+  }
+
+  removeEmptyDirectories(MIRROR_DOCS);
 }
 
 const upstream = walk(UPSTREAM_DOCS);
-const landing = walk(LANDING_DOCS);
+const mirror = existsSync(MIRROR_DOCS) ? walk(MIRROR_DOCS) : new Map();
+const missing = [];
+const drift = [];
+const extra = [];
 
-const missing = [];        // upstream 有, landing 无, 且不在 ignore 列表
-const ignoredMissing = []; // 故意不在 landing 里的(actions/*, dev docs)
-const extra = [];          // landing 有, upstream 无
-const drift = [];          // 都有但内容不同, 且不在 ignore 列表
-const ignoredDrift = [];   // 故意改写过的 site-specific 文档
-
-for (const [path, content] of upstream) {
-  if (!landing.has(path)) {
-    if (isIgnoredMissing(path)) ignoredMissing.push(path);
-    else missing.push(path);
-  } else if (hash(content) !== hash(landing.get(path))) {
-    const entry = {
-      path,
-      upstreamBytes: content.length,
-      landingBytes: landing.get(path).length,
-    };
-    if (isIgnoredDrift(path)) ignoredDrift.push(entry);
-    else drift.push(entry);
+for (const [docPath, sourcePath] of upstream) {
+  const mirrorPath = mirror.get(docPath);
+  if (!mirrorPath) {
+    missing.push(docPath);
+  } else if (readFileSync(sourcePath, 'utf8') !== readFileSync(mirrorPath, 'utf8')) {
+    drift.push(docPath);
   }
 }
-for (const path of landing.keys()) {
-  if (!upstream.has(path)) extra.push(path);
+
+for (const docPath of mirror.keys()) {
+  if (!upstream.has(docPath)) {
+    extra.push(docPath);
+  }
 }
 
 const report = {
+  mode: WRITE ? 'write' : 'check',
+  sdkCommit: getSdkCommit(),
   upstream: UPSTREAM_DOCS,
-  landing: LANDING_DOCS,
+  mirror: MIRROR_DOCS,
   upstreamCount: upstream.size,
-  landingCount: landing.size,
+  mirrorCount: mirror.size,
   missing: missing.sort(),
-  ignoredMissing: ignoredMissing.sort(),
+  drift: drift.sort(),
   extra: extra.sort(),
-  drift: drift.sort((a, b) => a.path.localeCompare(b.path)),
-  ignoredDrift: ignoredDrift.sort((a, b) => a.path.localeCompare(b.path)),
 };
 
 if (JSON_MODE) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  console.log(`[sync-docs] upstream: ${UPSTREAM_DOCS}`);
-  console.log(`[sync-docs] landing:  ${LANDING_DOCS}`);
-  console.log(`[sync-docs] upstream files: ${upstream.size}`);
-  console.log(`[sync-docs] landing files:  ${landing.size}`);
-  console.log('');
+  console.log(`[sync-docs] mode: ${report.mode}`);
+  console.log(`[sync-docs] sdk commit: ${report.sdkCommit}`);
+  console.log(`[sync-docs] upstream: ${report.upstream}`);
+  console.log(`[sync-docs] mirror: ${report.mirror}`);
+  console.log(`[sync-docs] files: upstream=${report.upstreamCount}, mirror=${report.mirrorCount}`);
 
-  if (missing.length) {
-    console.log(`Missing in landing (${missing.length}):`);
-    for (const p of missing) console.log(`  - ${p}`);
-    console.log('');
-  }
-  if (ignoredMissing.length) {
-    console.log(`Ignored missing (intentional, ${ignoredMissing.length}):`);
-    for (const p of ignoredMissing) console.log(`  · ${p}`);
-    console.log('');
-  }
-  if (extra.length) {
-    console.log(`Extra in landing, not upstream (${extra.length}):`);
-    for (const p of extra) console.log(`  + ${p}`);
-    console.log('');
-  }
-  if (drift.length) {
-    console.log(`Drifted (different content) (${drift.length}):`);
-    for (const d of drift) {
-      const diff = d.landingBytes - d.upstreamBytes;
-      const sign = diff > 0 ? '+' : '';
-      console.log(`  ~ ${d.path}  (landing ${sign}${diff}B vs upstream)`);
+  for (const [kind, paths] of Object.entries({ missing, drift, extra })) {
+    if (paths.length > 0) {
+      console.log(`[sync-docs] ${kind} (${paths.length}):`);
+      for (const docPath of paths) {
+        console.log(`  - ${docPath}`);
+      }
     }
-    console.log('');
   }
-  if (ignoredDrift.length) {
-    console.log(`Ignored drift (site-specific authoring, ${ignoredDrift.length}):`);
-    for (const d of ignoredDrift) {
-      const diff = d.landingBytes - d.upstreamBytes;
-      const sign = diff > 0 ? '+' : '';
-      console.log(`  · ${d.path}  (landing ${sign}${diff}B vs upstream)`);
-    }
-    console.log('');
-  }
-  if (!missing.length && !extra.length && !drift.length) {
-    console.log('All docs in sync.');
+
+  if (missing.length === 0 && drift.length === 0 && extra.length === 0) {
+    console.log('[sync-docs] mirror is in sync.');
   }
 }
 
-if (CHECK && (missing.length || drift.length)) {
-  // 注意:extra / ignoredMissing / ignoredDrift 不阻塞 CI
-  process.exit(1);
+if (CHECK && (missing.length > 0 || drift.length > 0 || extra.length > 0)) {
+  process.exitCode = 1;
 }

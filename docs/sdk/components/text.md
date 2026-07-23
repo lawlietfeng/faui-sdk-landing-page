@@ -51,13 +51,13 @@
 ### 上下文变量 `$root` 与 `$current`
 
 当 `text` 组件单独存在时，`${name}` 等同于 `${$root.name}`。
-当 `text` 组件被嵌套在 `repeater` 等具有**局部作用域**的循环组件中时，你可以使用：
+当 `text` 组件被嵌套在 `list` 或 `table` 等具有**局部作用域**的列表组件中时，你可以使用：
 - `$current`：访问当前循环项的数据。
 - `$root`：访问最外层全局的 `dataModel` 数据。
 
 ```json
 {
-  "id": "repeater-item-text",
+  "id": "list-item-text",
   "component": "text",
   "content": "商品：${$current.productName}，全场折扣：${$root.globalDiscount}"
 }

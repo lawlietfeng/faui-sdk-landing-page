@@ -1,6 +1,6 @@
 {
-  "name": "faui-landing-page",
-  "description": "Form-edition demo site for faui with AI Agent builder and component docs",
+  "name": "faui-sdk-landing-page",
+  "description": "Documentation and demo site for the FAUI SDK",
   "version": "1.0.0",
   "private": true,
   "engines": {
@@ -10,9 +10,9 @@
   "author": "lawliet",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lawlietfeng/faui-landing-page.git"
+    "url": "https://github.com/lawlietfeng/faui-sdk-landing-page.git"
   },
-  "homepage": "https://github.com/lawlietfeng/faui-landing-page#readme",
+  "homepage": "https://github.com/lawlietfeng/faui-sdk-landing-page#readme",
   "keywords": [
     "faui",
     "json-schema",
@@ -27,14 +27,17 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync-docs": "node scripts/sync-docs.mjs",
-    "sync-docs:check": "node scripts/sync-docs.mjs --check"
+    "sync-docs:check": "node scripts/sync-docs.mjs --check",
+    "check-doc-links": "node scripts/check-doc-links.mjs"
   },
   "dependencies": {
-    "@lawlietfeng/faui": "^1.0.0",
     "@lawlietfeng/faui-agent": "^1.0.1",
+    "@ant-design/icons": "^6.1.0",
     "antd": "^6.3.5",
     "axios": "^1.15.0",
     "dayjs": "^1.11.20",
+    "echarts": "^6.0.0",
+    "framer-motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",

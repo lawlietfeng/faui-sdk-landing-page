@@ -11,7 +11,7 @@
 
 | 属性名 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `submitButtonId` | `string` | - | **必填**。指定触发当前表单校验的提交按钮的组件 ID |
+| `submitButtonId` | `string` | - | 内部提交模式使用。指定触发当前表单校验的提交按钮组件 ID；外部提交模式可省略 |
 | `children` | `string[]` | `[]` | 表单内的所有字段组件和提交按钮的 ID 数组 |
 | `layout` | `string` | `horizontal` | 表单项布局方式，可选 `horizontal`（水平，左标签右输入）或 `vertical`（垂直，上标签下输入） |
 
@@ -19,7 +19,7 @@
 
 ### submitButtonId（提交按钮关联）
 
-`form` 组件的核心机制之一。你必须指定一个按钮组件的 `id` 作为 `submitButtonId`。当用户点击该按钮时，`form` 组件会拦截该按钮原有的 `on_tap` 动作，转而先对所有 `children` 中的表单控件执行校验。
+内部提交模式需要指定一个按钮组件的 `id` 作为 `submitButtonId`。当用户点击该按钮时，`form` 组件会先对所有 `children` 中的表单控件执行校验。
 只有所有校验全部通过，`form` 才会放行，让该按钮的 `on_tap` 动作序列继续执行。
 
 ```json
@@ -159,4 +159,5 @@
 - FAUI 引擎内置了表单拦截机制，当校验失败时，引擎会自动在对应的输入框下方渲染出红色字体的 `message` 错误提示，并默默阻断 `on_tap` 执行。开发者不需要手动去获取错误信息弹窗。
 
 **Q: 想在表单外部放置提交按钮可以吗？**
-- **强烈不建议**。为了保证 `form` Context 能够正确收集到所有的字段和按钮引用，提交按钮必须作为子节点存在于 `form` 的 `children` 树中（直接子节点或深层嵌套子节点均可）。放在 `form` 外部会导致 `submitButtonId` 关联失效。
+- 可以。外部提交使用独立的 `onSubmit` 回调，不执行内部按钮的 `on_tap` 或 `http_proxy`。schema 中可以完全不配置 `submitButtonId` 和内部按钮。
+- 完整用法见 [外部校验与提交](../external-submit.md)。

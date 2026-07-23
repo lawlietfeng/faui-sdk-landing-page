@@ -1,6 +1,6 @@
 # chart — 数据可视化组件
 
-基于 Apache ECharts 的声明式图表组件。支持简化模式(快速生成常见图表)和原生模式(完整 ECharts option)。
+基于 Apache ECharts 的声明式图表组件。支持简化模式（快速生成常见图表）和原生模式（完整 ECharts option）。
 
 ## 前置依赖
 
@@ -8,13 +8,11 @@
 npm install echarts
 ```
 
-`echarts` 是 optional peerDependency,未安装时 chart 组件会显示友好提示。
-
-> 装了 echarts 才能画图,没装就画不了图,所以画不画图取决于你装没装 echarts,装了就能画,不装就不能画。
+`echarts` 是 optional peerDependency，未安装时 chart 组件会显示友好提示。
 
 ## 简化模式
 
-通过 `chartType` + `xField` + `yField` 快速生成图表:
+通过 `chartType` + `xField` + `yField` 快速生成图表：
 
 ```json
 {
@@ -30,7 +28,7 @@ npm install echarts
 }
 ```
 
-多系列(多条线 / 多柱):
+多系列（多条线 / 多柱）：
 
 ```json
 {
@@ -44,7 +42,7 @@ npm install echarts
 }
 ```
 
-按字段分组:
+按字段分组：
 
 ```json
 {
@@ -61,7 +59,7 @@ npm install echarts
 
 ## 原生模式
 
-直接传 ECharts option 对象,支持全部 50+ 图表类型:
+直接传 ECharts option 对象，支持全部 50+ 图表类型：
 
 ```json
 {
@@ -80,7 +78,7 @@ npm install echarts
 }
 ```
 
-有 `option` 时走原生模式,否则走简化模式。**两者择一,不要同时配。**
+有 `option` 时用原生模式，否则用简化模式。
 
 ## 属性
 
@@ -90,28 +88,28 @@ npm install echarts
 |------|------|--------|------|
 | `height` | `number \| string` | `400` | 图表容器高度 |
 | `theme` | `'light' \| 'dark' \| string` | — | ECharts 主题 |
-| `loading` | `boolean \| string` | — | 加载状态,支持表达式 |
+| `loading` | `boolean \| string` | — | 加载状态，支持表达式 |
 | `style` | `CSSProperties` | — | 容器自定义样式 |
 
 ### 初始化时序
 
-Chart 组件会等待容器获得**非零尺寸**(`clientWidth > 0 && clientHeight > 0`)后再初始化 ECharts 实例。如果容器在首次渲染时尺寸为 0(例如在动画容器、Condition 分支、Spin 等延迟渲染场景中),组件会通过 `ResizeObserver` + `requestAnimationFrame` 自动重试(最多 20 帧 ≈ 330ms),确保容器获得尺寸后立即完成初始化。
+Chart 组件会等待容器获得非零尺寸（`clientWidth > 0 && clientHeight > 0`）后再初始化 ECharts 实例。如果容器在首次渲染时尺寸为 0（例如在动画容器、Condition 分支、Spin 等延迟渲染场景中），组件会通过 ResizeObserver + requestAnimationFrame 自动重试（最多 20 帧 ≈ 330ms），确保容器获得尺寸后立即完成初始化。
 
-> **注意**:在 flex 布局中使用 Chart 时,确保图表的父容器有明确的宽度(如 `"width": "100%"`),否则 ECharts 可能因为拿不到容器宽度而无法渲染。
+> **注意**：在 flex 布局中使用 Chart 时，确保图表的父容器有明确的宽度（如 `"width": "100%"`），否则 ECharts 可能因为拿不到容器宽度而无法渲染。
 
 ### 简化模式属性
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
-| `chartType` | `string` | 图表类型(见下方列表) |
+| `chartType` | `string` | 图表类型（见下方列表） |
 | `data` | `ValueBinding` | 数据源路径 |
 | `xField` | `string` | X 轴字段名 |
-| `yField` | `string \| string[]` | Y 轴字段名,数组时生成多系列 |
+| `yField` | `string \| string[]` | Y 轴字段名，数组时生成多系列 |
 | `seriesField` | `string` | 分组字段 |
 | `smooth` | `boolean` | 折线是否平滑 |
 | `stacked` | `boolean` | 是否堆叠 |
 | `showLegend` | `boolean` | 显示图例 |
-| `showTooltip` | `boolean` | 显示 tooltip(默认 true) |
+| `showTooltip` | `boolean` | 显示 tooltip（默认 true） |
 
 ### 原生模式属性
 
@@ -119,7 +117,7 @@ Chart 组件会等待容器获得**非零尺寸**(`clientWidth > 0 && clientHeig
 |------|------|------|
 | `option` | `Record<string, unknown>` | 完整 ECharts option 对象 |
 
-### 支持的 chartType(简化模式)
+### 支持的 chartType
 
 | chartType | 说明 |
 |-----------|------|
@@ -135,7 +133,7 @@ Chart 组件会等待容器获得**非零尺寸**(`clientWidth > 0 && clientHeig
 
 ## 表达式支持
 
-所有属性支持 `${...}` 动态表达式:
+所有属性支持 `${...}` 动态表达式：
 
 ```json
 {
@@ -147,15 +145,6 @@ Chart 组件会等待容器获得**非零尺寸**(`clientWidth > 0 && clientHeig
 }
 ```
 
-## 常见问题
+## 演示
 
-### 报 "ECharts is not installed"
-没装可选 peer。`npm i echarts` 即可。
-
-### 容器为空,什么也不显示
-父容器宽度为 0 是最常见原因。Chart 自身会等待非零尺寸,但如果父级永远是 0(例如 `display: none`),它就一直在等。
-
-### option 和 chartType 都配了,以哪个为准?
-有 `option` 时简化模式属性会被忽略。**配置只生效一份,以更细粒度的那份为准——`option` 比 `chartType` 细。**
-
-> 简化模式比原生模式简单,原生模式比简化模式原生,所以想简单就简化,想原生就原生。
+`examples/schemas/16-chart-demo.json`

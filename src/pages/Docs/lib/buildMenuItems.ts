@@ -1,49 +1,58 @@
 import type { MenuProps } from 'antd';
-import { componentCategories } from '../componentCategories';
-import type { GuideItem } from './processDocs';
+import type {
+  DocNavigationItem,
+  DocumentationModel,
+} from './processDocs';
 
-// 把指南列表 + 组件分类 + 搜索词组合成 Ant Design Menu items。
-// 搜索词非空时隐藏“使用指南”分组,只在组件分类内做名字过滤。
+function formatLabel(item: DocNavigationItem): string {
+  return item.availability === 'full' ? `${item.label} · Full` : item.label;
+}
+
+function toMenuItem(item: DocNavigationItem) {
+  return { key: item.path, label: formatLabel(item) };
+}
+
 export function buildMenuItems(
-  guideItems: GuideItem[],
-  componentDocs: Map<string, string>,
+  documentation: DocumentationModel,
   searchQuery: string,
 ): NonNullable<MenuProps['items']> {
-  const query = searchQuery.toLowerCase().trim();
+  const query = searchQuery.trim().toLocaleLowerCase();
 
-  const categoryChildren = componentCategories.flatMap((cat) => {
-    const items = cat.children
-      .filter((name) => componentDocs.has(name))
-      .filter((name) => !query || name.includes(query))
-      .map((name) => {
-        const baseLabel = name.charAt(0).toUpperCase() + name.slice(1);
-        return {
-          key: componentDocs.get(name)!,
-          label: baseLabel,
-        };
-      });
-
-    if (items.length === 0) return [];
+  if (query) {
+    const matchingRoutes = documentation.routes.filter((route) => {
+      const searchText = `${route.label}\n${route.title}\n${route.content}`.toLocaleLowerCase();
+      return searchText.includes(query);
+    });
 
     return [{
-      key: cat.key,
-      label: cat.label,
-      children: items,
-    }];
-  });
-
-  const menuItems: NonNullable<MenuProps['items']> = [];
-
-  if (!query) {
-    menuItems.push({
-      key: 'guides',
-      label: '使用指南',
+      key: 'search-results',
       type: 'group',
-      children: guideItems.map((g) => ({ key: g.key, label: g.label })),
-    });
+      label: `搜索结果 (${matchingRoutes.length})`,
+      children: matchingRoutes.map((route) => ({
+        key: route.path,
+        label: route.availability === 'full' ? `${route.label} · Full` : route.label,
+      })),
+    }];
   }
 
-  menuItems.push(...categoryChildren);
+  return documentation.navigation.map((section) => {
+    if (section.categories) {
+      return {
+        key: section.key,
+        label: section.label,
+        children: section.categories.map((category) => ({
+          key: category.key,
+          label: category.label,
+          children: category.items.map(toMenuItem),
+        })),
+      };
+    }
 
-  return menuItems;
+    return {
+      key: section.key,
+      type: 'group',
+      label: section.label,
+      children: section.items?.map(toMenuItem),
+    };
+  });
 }

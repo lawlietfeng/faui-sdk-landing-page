@@ -1,10 +1,12 @@
 import { memo, useState } from 'react';
-import { Renderer } from '@lawlietfeng/faui';
-import type { Activity, HttpRequestConfig } from '@lawlietfeng/faui';
+import { Renderer as FormRenderer } from '@lawlietfeng/faui-sdk';
+import { Renderer as FullRenderer } from '@lawlietfeng/faui-sdk/full';
+import type { Activity, HttpRequestConfig } from '@lawlietfeng/faui-sdk';
 import {
   Alert,
   Button,
   Input,
+  Segmented,
   Tabs,
   Tag,
 } from 'antd';
@@ -20,6 +22,7 @@ import {
   validateActivitiesInput,
   type DebugIssue,
   type DebugIssueCategory,
+  type DebugEdition,
   type DebugResult,
 } from './lib/validateActivities';
 
@@ -70,8 +73,10 @@ const httpRequest = async (config: HttpRequestConfig) => {
   return response.data;
 };
 
-const MemoizedRenderer = memo(function MemoizedRenderer({ schema }: { schema: Activity[] }) {
-  return <Renderer schema={schema} httpRequest={httpRequest} />;
+const MemoizedRenderer = memo(function MemoizedRenderer({ schema, edition }: { schema: Activity[]; edition: DebugEdition }) {
+  return edition === 'form'
+    ? <FormRenderer schema={schema} httpRequest={httpRequest} />
+    : <FullRenderer schema={schema} httpRequest={httpRequest} />;
 });
 
 function buildStatus(result: DebugResult | null): {
@@ -94,7 +99,7 @@ function buildStatus(result: DebugResult | null): {
     return {
       type: 'error',
       message: '当前输入不能在本站渲染',
-      description: `发现 ${errorCount} 个错误${warningCount > 0 ? `，以及 ${warningCount} 个提示` : ''}。`,
+      description: `${result.edition === 'form' ? 'Form Edition' : 'Full Edition'}：发现 ${errorCount} 个错误${warningCount > 0 ? `，以及 ${warningCount} 个提示` : ''}。`,
     };
   }
 
@@ -102,14 +107,14 @@ function buildStatus(result: DebugResult | null): {
     return {
       type: 'warning',
       message: '当前输入可以渲染，但有兼容性提示',
-      description: `发现 ${warningCount} 个提示。`,
+      description: `${result.edition === 'form' ? 'Form Edition' : 'Full Edition'}：发现 ${warningCount} 个提示。`,
     };
   }
 
   return {
     type: 'success',
     message: '当前输入可以在本站渲染',
-    description: '未发现常见结构问题。',
+    description: `${result.edition === 'form' ? 'Form Edition' : 'Full Edition'}：未发现常见结构问题。`,
   };
 }
 
@@ -120,7 +125,7 @@ function IssueList({ issues }: { issues: DebugIssue[] }) {
         type="success"
         showIcon
         message="未发现常见结构问题"
-        description="当前输入通过了 v1 的基础校验，可以在本站继续看渲染效果。"
+        description="当前输入通过基础结构与注册表校验，可以在本站继续看渲染效果。"
       />
     );
   }
@@ -160,11 +165,14 @@ export default function JsonDebug() {
   const [rawInput, setRawInput] = useState('');
   const [lastEvaluatedInput, setLastEvaluatedInput] = useState('');
   const [result, setResult] = useState<DebugResult | null>(null);
+  const [edition, setEdition] = useState<DebugEdition>('form');
 
   const handleEvaluate = () => {
-    const nextResult = validateActivitiesInput(rawInput);
+    const nextResult = validateActivitiesInput(rawInput, edition);
+    const evaluatedInput = nextResult.formattedJson || rawInput;
     setResult(nextResult);
-    setLastEvaluatedInput(rawInput);
+    setRawInput(evaluatedInput);
+    setLastEvaluatedInput(evaluatedInput);
   };
 
   const status = buildStatus(result);
@@ -178,7 +186,7 @@ export default function JsonDebug() {
             JSON 调试
           </h2>
           <p className="mt-2 mb-0 text-sm leading-6 text-gray-500 dark:text-gray-400">
-            只接受完整的 Activity[] 数组输入。点击按钮后才会重新校验并渲染。
+            只接受完整的 Activity[] 数组输入。校验器和预览始终使用同一个 Edition 注册表。
           </p>
         </div>
 
@@ -191,15 +199,24 @@ export default function JsonDebug() {
               <div className="text-sm leading-6">
                 <div>1. 只支持 Activity[] 数组，不支持直接粘贴 PageSchema 对象。</div>
                 <div>2. 至少需要一个 ACTIVITY_SNAPSHOT，ACTIVITY_DELTA 可以和它一起出现。</div>
-                <div>3. v1 只做基础校验，重点告诉你能不能在本站渲染，以及常见问题在哪。</div>
+                <div>3. 会检查 JSON Patch 的基础结构、组件 ID、children 引用和当前 Edition 的组件范围。</div>
               </div>
             )}
           />
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden px-6 py-5 gap-4">
+          <Segmented
+            block
+            value={edition}
+            options={[
+              { value: 'form', label: 'Form Edition' },
+              { value: 'full', label: 'Full Edition' },
+            ]}
+            onChange={(value) => setEdition(value as DebugEdition)}
+          />
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>输入区</span>
+            <span>输入区 · {edition === 'form' ? 'Form Edition' : 'Full Edition'}</span>
             {result && (
               <span>{isDirty ? '输入已变更，尚未重新校验' : '当前结果已同步到本次输入'}</span>
             )}
@@ -259,7 +276,7 @@ export default function JsonDebug() {
                       />
                       {result.canRender ? (
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 min-h-[200px]">
-                          <MemoizedRenderer schema={result.activities} />
+                          <MemoizedRenderer schema={result.activities} edition={result.edition} />
                         </div>
                       ) : (
                         <div className="flex items-center justify-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[240px] text-sm text-gray-500 dark:text-gray-400">
@@ -297,7 +314,7 @@ export default function JsonDebug() {
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-sm">
-                      校验完成后，这里会告诉你是结构问题还是 Form 版兼容性问题
+                      校验完成后，这里会告诉你是结构问题还是当前 Edition 的兼容性问题
                     </div>
                   )}
                 </div>

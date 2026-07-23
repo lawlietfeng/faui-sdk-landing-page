@@ -4,7 +4,7 @@
 
 ## 适用场景
 
-- **管理后台页面**：左侧导航区，顶部信息栏，中间内容区。
+- **管理后台页面**：左侧菜单栏，顶部导航栏，中间内容区。
 - **页面整体骨架**：快速搭建全屏的圣杯布局、双飞翼布局。
 
 ## 组件关系与类型
@@ -60,9 +60,9 @@
   "width": 250,
   "theme": "light",
   "value": {
-    "path": "/layout/siderCollapsed"
+    "path": "/layout/menuCollapsed"
   },
-  "children": ["side-title"]
+  "children": ["app-menu"]
 }
 ```
 
@@ -78,13 +78,13 @@
     "background": "#ffffff",
     "padding": "0 24px"
   },
-  "children": ["user-info-text"]
+  "children": ["user-avatar"]
 }
 ```
 
 ## 完整示例
 
-一个标准的管理后台布局：左侧带折叠功能的暗色侧栏，右侧包含顶栏、白底内容区和底栏：
+一个标准的管理后台布局：左侧带折叠功能的暗色菜单，右侧包含顶栏、白底内容区和底栏：
 
 ```json
 [
@@ -100,7 +100,7 @@
     "collapsible": true,
     "theme": "dark",
     "value": { "path": "/isCollapsed" },
-    "children": ["side-title"]
+    "children": ["logo-image"]
   },
   {
     "id": "main-layout",
@@ -124,31 +124,6 @@
     "component": "footer",
     "style": { "textAlign": "center" },
     "children": ["copyright-text"]
-  },
-  {
-    "id": "side-title",
-    "component": "text",
-    "content": "FAUI"
-  },
-  {
-    "id": "user-info-text",
-    "component": "text",
-    "content": "当前用户：管理员"
-  },
-  {
-    "id": "page-body-box",
-    "component": "box",
-    "children": ["page-body-text"]
-  },
-  {
-    "id": "page-body-text",
-    "component": "text",
-    "content": "页面内容"
-  },
-  {
-    "id": "copyright-text",
-    "component": "text",
-    "content": "© FAUI"
   }
 ]
 ```
