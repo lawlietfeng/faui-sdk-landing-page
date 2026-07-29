@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu, Input, Button } from 'antd';
-import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router';
 import { SearchOutlined } from '@ant-design/icons';
 import { processDocs, DEFAULT_DOC_PATH } from './lib/processDocs';
 import { buildMenuItems } from './lib/buildMenuItems';
@@ -41,6 +41,7 @@ function DocNotFound({ fallbackPath }: { fallbackPath: string }) {
 export default function Docs() {
   const navigate = useNavigate();
   const location = useLocation();
+  const contentRef = useRef<HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const documentation = useMemo(() => processDocs(), []);
   const { navigation, routes } = documentation;
@@ -54,12 +55,18 @@ export default function Docs() {
     ? DEFAULT_DOC_PATH
     : routes[0]?.path ?? '';
   const currentPath = location.pathname.replace('/docs', '');
-  const selectedKeys = [currentPath === '' || currentPath === '/' ? defaultPath : currentPath];
+  const selectedPath = currentPath === '' || currentPath === '/' ? defaultPath : currentPath;
+  const selectedKeys = [selectedPath];
+  const activeNavigationSection = navigation.find((section) => (
+    section.collapsible && section.items.some((item) => item.path === selectedPath)
+  ))?.key;
+  const [openKeys, setOpenKeys] = useState<string[]>(() => (
+    activeNavigationSection ? [activeNavigationSection] : []
+  ));
 
-  const defaultOpenKeys = navigation.flatMap((section) => [
-    section.key,
-    ...(section.categories?.map((category) => category.key) ?? []),
-  ]);
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [location.pathname]);
 
   return (
     <div className="flex h-full w-full bg-white dark:bg-[#121212] overflow-hidden pt-16">
@@ -78,15 +85,26 @@ export default function Docs() {
         <Menu
           mode="inline"
           selectedKeys={selectedKeys}
-          defaultOpenKeys={defaultOpenKeys}
+          openKeys={openKeys}
           className="flex-1 border-r-0 py-2 !bg-transparent dark:!text-gray-300"
           items={menuItems}
-          onClick={({ key }) => navigate(`/docs${key}`)}
+          onOpenChange={setOpenKeys}
+          onClick={({ key }) => {
+            const targetSection = navigation.find((section) => (
+              section.collapsible && section.items.some((item) => item.path === key)
+            ))?.key;
+
+            if (targetSection && !openKeys.includes(targetSection)) {
+              setOpenKeys([...openKeys, targetSection]);
+            }
+
+            navigate(`/docs${key}`);
+          }}
         />
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-white dark:bg-[#121212]">
+      <main ref={contentRef} className="flex-1 overflow-y-auto bg-white dark:bg-[#121212]">
         <div className="min-h-[280px]">
           <Routes>
             {routes.map((route) => (

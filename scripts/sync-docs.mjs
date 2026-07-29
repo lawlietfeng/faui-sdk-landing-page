@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 将 ../faui-sdk/docs 完整镜像到 docs/sdk，或检查镜像是否与上游一致。
+// 将 ../faui-sdk/docs 镜像到 docs/sdk（排除站点不展示的根 README），或检查镜像是否与上游一致。
 //
 //   npm run sync-docs         写入镜像
 //   npm run sync-docs:check   只检查，任意 missing / drift / extra 均失败
@@ -27,6 +27,8 @@ const args = new Set(process.argv.slice(2));
 const CHECK = args.has('--check');
 const JSON_MODE = args.has('--json');
 const WRITE = !CHECK || args.has('--write');
+// 上游根 README 只用于文档目录说明；站点以 npm 使用指南作为默认入口。
+const EXCLUDED_SDK_DOCS = new Set(['README.md']);
 
 function walk(root) {
   const files = new Map();
@@ -45,6 +47,12 @@ function walk(root) {
 
   visit(root);
   return files;
+}
+
+function withoutExcludedDocs(files) {
+  return new Map(
+    [...files].filter(([docPath]) => !EXCLUDED_SDK_DOCS.has(docPath)),
+  );
 }
 
 function getSdkCommit() {
@@ -75,7 +83,7 @@ if (!existsSync(UPSTREAM_DOCS) || !statSync(UPSTREAM_DOCS).isDirectory()) {
 
 if (WRITE) {
   mkdirSync(MIRROR_DOCS, { recursive: true });
-  const upstreamBeforeWrite = walk(UPSTREAM_DOCS);
+  const upstreamBeforeWrite = withoutExcludedDocs(walk(UPSTREAM_DOCS));
   const mirrorBeforeWrite = walk(MIRROR_DOCS);
 
   for (const [docPath, sourcePath] of upstreamBeforeWrite) {
@@ -93,7 +101,7 @@ if (WRITE) {
   removeEmptyDirectories(MIRROR_DOCS);
 }
 
-const upstream = walk(UPSTREAM_DOCS);
+const upstream = withoutExcludedDocs(walk(UPSTREAM_DOCS));
 const mirror = existsSync(MIRROR_DOCS) ? walk(MIRROR_DOCS) : new Map();
 const missing = [];
 const drift = [];

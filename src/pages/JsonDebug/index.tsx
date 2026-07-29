@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
-import { Renderer as FormRenderer } from '@lawlietfeng/faui-sdk';
-import { Renderer as FullRenderer } from '@lawlietfeng/faui-sdk/full';
-import type { Activity, HttpRequestConfig } from '@lawlietfeng/faui-sdk';
+import { Renderer as FormRenderer } from '@faui/react';
+import { Renderer as FullRenderer } from '@faui/react/full';
+import type { Activity, HttpRequestConfig } from '@faui/react';
 import {
   Alert,
   Button,

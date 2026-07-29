@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router';
 import { SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useTheme } from './useTheme';
 

@@ -9,20 +9,12 @@ export const componentCategories: ComponentCategory[] = [
   {
     key: 'layout-navigation',
     label: '布局与导航',
-    children: [
-      'affix', 'anchor', 'box', 'divider', 'dropdown', 'flex', 'floatbutton',
-      'grid', 'layout', 'menu', 'space', 'tabs',
-    ],
+    children: ['box', 'divider', 'flex', 'grid', 'layout', 'space'],
   },
   {
     key: 'data-display',
     label: '数据展示',
-    children: [
-      'avatar', 'badge', 'calendar', 'card', 'carousel', 'collapse',
-      'descriptions', 'empty', 'icon', 'image', 'list', 'pagination',
-      'progress', 'qrcode', 'skeleton', 'statistic', 'stepindicator', 'steps',
-      'table', 'tag', 'text', 'timeline', 'tree', 'typography', 'watermark',
-    ],
+    children: ['calendar', 'icon', 'progress', 'skeleton', 'tag', 'text', 'typography'],
   },
   {
     key: 'form-data-entry',
@@ -37,18 +29,20 @@ export const componentCategories: ComponentCategory[] = [
   {
     key: 'feedback',
     label: '弹层与反馈',
-    children: ['alert', 'drawer', 'modal', 'popconfirm', 'popover', 'spin', 'tooltip', 'tour'],
+    children: ['alert', 'drawer', 'modal', 'popconfirm', 'popover', 'spin', 'tooltip'],
   },
   {
     key: 'logic-control-flow',
     label: '逻辑与控制流',
     children: ['condition', 'repeater'],
   },
-  {
-    key: 'data-visualization',
-    label: '数据可视化',
-    children: ['chart'],
-  },
+];
+
+export const fullComponentSlugs = [
+  'affix', 'anchor', 'avatar', 'badge', 'card', 'carousel', 'chart', 'collapse',
+  'descriptions', 'dropdown', 'empty', 'floatbutton', 'image', 'list', 'menu',
+  'pagination', 'qrcode', 'statistic', 'stepindicator', 'steps', 'table', 'tabs',
+  'timeline', 'tour', 'tree', 'watermark',
 ];
 
 export const componentRegistryNamesByDocSlug: Record<string, string[]> = {
@@ -58,5 +52,5 @@ export const componentRegistryNamesByDocSlug: Record<string, string[]> = {
 };
 
 export const documentedComponentSlugs = new Set(
-  componentCategories.flatMap((category) => category.children),
+  [...componentCategories.flatMap((category) => category.children), ...fullComponentSlugs],
 );

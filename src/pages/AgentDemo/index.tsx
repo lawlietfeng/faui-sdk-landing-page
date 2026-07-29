@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
-import { Renderer } from '@lawlietfeng/faui-sdk/full';
-import type { ActionConfig, ActivitySnapshot, Content, HttpRequestConfig } from '@lawlietfeng/faui-sdk/full';
+import { Renderer } from '@faui/react/full';
+import type { ActionConfig, ActivitySnapshot, Content, HttpRequestConfig } from '@faui/react/full';
 import { FauiAgent, TOOL_SYSTEM_PROMPT } from '@lawlietfeng/faui-agent';
 import type { PageSchema } from '@lawlietfeng/faui-agent';
 import { Input, Button, Tabs, message, Collapse, Select } from 'antd';

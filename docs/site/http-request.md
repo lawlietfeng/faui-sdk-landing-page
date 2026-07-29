@@ -32,8 +32,8 @@
 把下面的函数传给 `Renderer` 或 `SchemaRenderer`。非 2xx 响应会抛出错误，因此 Schema 中的 `on_error` 可以继续处理失败状态。
 
 ```tsx
-import { Renderer } from '@lawlietfeng/faui-sdk';
-import type { HttpRequestConfig } from '@lawlietfeng/faui-sdk';
+import { Renderer } from '@faui/react';
+import type { HttpRequestConfig } from '@faui/react';
 
 const httpRequest = async (config: HttpRequestConfig) => {
   const response = await fetch(config.url, {
@@ -118,7 +118,7 @@ Schema 中的 `path` 写外部接口地址：
 前端的 `httpRequest` 固定请求自己的后端 proxy，不直接请求 `config.url`：
 
 ```tsx
-import type { HttpRequestConfig } from '@lawlietfeng/faui-sdk';
+import type { HttpRequestConfig } from '@faui/react';
 
 const httpRequest = async (config: HttpRequestConfig) => {
   const response = await fetch('/api/faui/proxy', {

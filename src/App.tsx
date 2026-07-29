@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router';
 import GlobalLayout from './components/GlobalLayout';
 import 'antd/dist/reset.css';
 

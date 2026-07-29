@@ -48,8 +48,8 @@
 以下示例演示通过扩展 `ActionRegistry` 接管 `copy`：
 
 ```tsx
-import { ActionRegistry, evaluateExpression } from '@lawlietfeng/faui-sdk';
-import type { ActionConfig } from '@lawlietfeng/faui-sdk';
+import { ActionRegistry, evaluateExpression } from '@faui/react';
+import type { ActionConfig } from '@faui/react';
 
 ActionRegistry.copy = async (action: ActionConfig, executor: any) => {
   const text = evaluateExpression(String((action.payload as any)?.text ?? ''), executor.context);

@@ -1,6 +1,6 @@
-import { ComponentRegistry as FormComponentRegistry } from '@lawlietfeng/faui-sdk';
-import { ComponentRegistry as FullComponentRegistry } from '@lawlietfeng/faui-sdk/full';
-import type { Activity } from '@lawlietfeng/faui-sdk';
+import { ComponentRegistry as FormComponentRegistry } from '@faui/react';
+import { ComponentRegistry as FullComponentRegistry } from '@faui/react/full';
+import type { Activity } from '@faui/react';
 
 export type DebugIssueSeverity = 'error' | 'warning';
 export type DebugIssueCategory = 'json' | 'activity' | 'schema' | 'registry';

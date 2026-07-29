@@ -5,7 +5,7 @@ import type {
 } from './processDocs';
 
 function formatLabel(item: DocNavigationItem): string {
-  return item.availability === 'full' ? `${item.label} · Full` : item.label;
+  return item.label;
 }
 
 function toMenuItem(item: DocNavigationItem) {
@@ -20,6 +20,10 @@ export function buildMenuItems(
 
   if (query) {
     const matchingRoutes = documentation.routes.filter((route) => {
+      if (!route.visible) {
+        return false;
+      }
+
       const searchText = `${route.label}\n${route.title}\n${route.content}`.toLocaleLowerCase();
       return searchText.includes(query);
     });
@@ -30,21 +34,17 @@ export function buildMenuItems(
       label: `搜索结果 (${matchingRoutes.length})`,
       children: matchingRoutes.map((route) => ({
         key: route.path,
-        label: route.availability === 'full' ? `${route.label} · Full` : route.label,
+        label: route.label,
       })),
     }];
   }
 
   return documentation.navigation.map((section) => {
-    if (section.categories) {
+    if (section.collapsible) {
       return {
         key: section.key,
         label: section.label,
-        children: section.categories.map((category) => ({
-          key: category.key,
-          label: category.label,
-          children: category.items.map(toMenuItem),
-        })),
+        children: section.items.map(toMenuItem),
       };
     }
 
@@ -52,7 +52,7 @@ export function buildMenuItems(
       key: section.key,
       type: 'group',
       label: section.label,
-      children: section.items?.map(toMenuItem),
+      children: section.items.map(toMenuItem),
     };
   });
 }

@@ -13,26 +13,19 @@ FAUI SDK 的文档与演示站。站点覆盖 Form Edition、Full Edition、Acti
 | Agent Demo | `/agent-demo` | 通过 `faui-agent` 生成并以 Full Edition 预览 Schema |
 | JSON Debug | `/json-debug` | 按 Form / Full Edition 校验和预览 `Activity[]` |
 
-## 本地 SDK 映射
+## SDK 制品来源
 
-开发阶段直接读取相邻目录的 FAUI SDK 源码：
+本站通过 `@faui/react` 使用云效制品仓库中的 SDK。项目根目录的 `.npmrc` 将 `@faui` scope 指向云效仓库，其他依赖仍使用 npm 官方源。
 
 ```text
-@lawlietfeng/faui-sdk       -> ../faui-sdk/src/index.tsx
-@lawlietfeng/faui-sdk/full  -> ../faui-sdk/src/full.tsx
+@faui/react       -> 云效制品仓库
+其他 npm 包        -> https://registry.npmjs.org/
 ```
-
-页面代码始终使用正式包名，不直接导入 `../faui-sdk/src/...`。因此本地 SDK 源码更新后，重新构建站点即可使用最新实现，无需先构建 SDK。
-
-后续切换至云效制品仓库时，只需删除 Vite alias 和 TypeScript paths，并添加同名制品依赖；页面中的 SDK import 不需要修改。
 
 ## 本地运行
 
-前提：本仓库与 `faui-sdk` 位于同一父目录。
-
 ```bash
 npm install
-npm run sync-docs
 npm run dev
 ```
 
@@ -75,6 +68,7 @@ scripts/                    # 文档同步与链接检查
 ## 相关项目
 
 - [faui-sdk](https://github.com/lawlietfeng/faui-sdk)：React 与 Ant Design 的 JSON Schema UI 渲染 SDK。
+- `@faui/react`：云效制品仓库中的 FAUI React SDK。
 - `@lawlietfeng/faui-agent`：Agent Demo 使用的工具调用协议实现。
 
 ## License
