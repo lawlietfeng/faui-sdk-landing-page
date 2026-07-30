@@ -49,3 +49,7 @@ export function resolveDocLink(href: string, route: DocRoute): string {
 export function isExternalDocLink(href: string): boolean {
   return isExternalUrl(href);
 }
+
+export function isInternalDocLink(href: string): boolean {
+  return href === '/docs' || href.startsWith('/docs/');
+}

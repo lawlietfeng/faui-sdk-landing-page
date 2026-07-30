@@ -4,7 +4,7 @@ export interface ComponentCategory {
   children: string[];
 }
 
-// 分类只负责站点导航。组件可用范围始终由本地 SDK 的注册表计算。
+// 分类只负责站点导航。组件可用范围由 @faui/react/manifest 计算。
 export const componentCategories: ComponentCategory[] = [
   {
     key: 'layout-navigation',
@@ -44,12 +44,6 @@ export const fullComponentSlugs = [
   'pagination', 'qrcode', 'statistic', 'stepindicator', 'steps', 'table', 'tabs',
   'timeline', 'tour', 'tree', 'watermark',
 ];
-
-export const componentRegistryNamesByDocSlug: Record<string, string[]> = {
-  grid: ['grid', 'row', 'col'],
-  layout: ['layout', 'header', 'sider', 'content', 'footer'],
-  floatbutton: ['float_button'],
-};
 
 export const documentedComponentSlugs = new Set(
   [...componentCategories.flatMap((category) => category.children), ...fullComponentSlugs],

@@ -24,7 +24,8 @@ export function buildMenuItems(
         return false;
       }
 
-      const searchText = `${route.label}\n${route.title}\n${route.content}`.toLocaleLowerCase();
+      // 正文按路由懒加载，搜索只匹配导航元数据，避免输入时下载全部 Markdown。
+      const searchText = `${route.label}\n${route.title}`.toLocaleLowerCase();
       return searchText.includes(query);
     });
 

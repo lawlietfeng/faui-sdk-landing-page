@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@lawlietfeng/faui-agent": "^1.0.1",
-    "@faui/react": "^0.0.1",
+    "@faui/react": "^0.0.2",
     "antd": "^6.3.5",
     "@ant-design/icons": "^6.1.0",
     "axios": "^1.15.0",

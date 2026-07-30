@@ -33,6 +33,12 @@ FAUI 提供了**双入口架构**，以满足不同业务层级的需求：
 - **标准化输出**：在编写或更新组件文档时，必须遵循统一的书写规范。
 - **参考指南**：请参阅 [组件文档书写规范 (docs/component-doc-standard.md)](./component-doc-standard.md) 了解详细的结构与排版要求。
 
+### 1.6 组件 Manifest 新鲜度
+- **对外契约**：`src/manifest.ts` 通过 `@faui/react/manifest` 向文档站提供组件能力清单。该模块只能包含静态数据，禁止导入 Renderer、React 或组件运行时依赖。
+- **同步范围**：新增、删除、重命名组件，或调整 `FormComponentRegistry`、`ComponentRegistry` 的注册名及可用版本时，必须在同一改动中更新 manifest。
+- **条目完整性**：每个文档组件条目必须包含 `slug`、`title`、`summary`、`category`、`availability` 与完整的 `registryNames`。一个文档页覆盖多个运行时组件时，例如 `grid` 或 `layout`，必须列出全部注册名。
+- **版本与验证**：`manifestVersion` 仅在消费方不兼容时递增。涉及 Registry 或 manifest 的改动，必须保持 `tests/components/registry-contract.test.tsx` 的契约断言有效，并执行 lint、typecheck、test。
+
 ---
 
 ## 2. 核心开发规范与防呆注意事项 (必读)

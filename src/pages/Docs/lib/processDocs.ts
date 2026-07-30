@@ -1,8 +1,6 @@
-import { ComponentRegistry as FormComponentRegistry } from '@faui/react';
-import { ComponentRegistry as FullComponentRegistry } from '@faui/react/full';
+import { componentManifest } from '@faui/react/manifest';
 import {
   componentCategories,
-  componentRegistryNamesByDocSlug,
   documentedComponentSlugs,
   fullComponentSlugs,
 } from '../componentCategories';
@@ -10,8 +8,12 @@ import {
 const markdownModules = import.meta.glob('../../../../docs/{sdk,site}/**/*.md', {
   query: '?raw',
   import: 'default',
-  eager: true,
 });
+
+type MarkdownLoader = () => Promise<string>;
+
+// 每篇 Markdown 都作为独立模块按需加载；缓存可避免重复访问同一篇文档。
+const markdownContentCache = new Map<string, Promise<string>>();
 
 const GUIDES_AND_REFERENCE = [
   ['sdk/development', '开发者指南'],
@@ -48,7 +50,7 @@ export interface DocRoute {
   path: string;
   documentPath: string;
   source: 'sdk' | 'site';
-  content: string;
+  loadContent: () => Promise<string>;
   label: string;
   title: string;
   visible: boolean;
@@ -75,21 +77,30 @@ export interface DocumentationModel {
 
 export const DEFAULT_DOC_PATH = '/sdk/development';
 
-function getTitle(content: string, fallback: string): string {
-  const heading = content.match(/^#\s+(.+)$/m)?.[1]?.trim();
-  return heading?.replaceAll('`', '') || fallback;
+function createContentLoader(modulePath: string, loader: MarkdownLoader): () => Promise<string> {
+  return () => {
+    const cached = markdownContentCache.get(modulePath);
+    if (cached) {
+      return cached;
+    }
+
+    const contentPromise = loader();
+    markdownContentCache.set(modulePath, contentPromise);
+    void contentPromise.catch(() => {
+      markdownContentCache.delete(modulePath);
+    });
+    return contentPromise;
+  };
 }
 
 function getAvailability(componentSlug: string): ComponentAvailability {
-  const registryNames = componentRegistryNamesByDocSlug[componentSlug] ?? [componentSlug];
-  const existsInForm = registryNames.every((name) => name in FormComponentRegistry);
-  const existsInFull = registryNames.every((name) => name in FullComponentRegistry);
+  const component = componentManifest.components.find((item) => item.slug === componentSlug);
 
-  if (!existsInFull) {
-    throw new Error(`SDK component document "${componentSlug}" has no matching Full Edition registry entry.`);
+  if (!component) {
+    throw new Error(`SDK component document "${componentSlug}" has no manifest entry.`);
   }
 
-  return existsInForm ? 'form-full' : 'full';
+  return component.availability;
 }
 
 function createItem(routes: Map<string, DocRoute>, key: string, label: string): DocNavigationItem {
@@ -105,7 +116,7 @@ function createItem(routes: Map<string, DocRoute>, key: string, label: string): 
 export function processDocs(): DocumentationModel {
   const routesByKey = new Map<string, DocRoute>();
 
-  for (const [modulePath, moduleContent] of Object.entries(markdownModules)) {
+  for (const [modulePath, loader] of Object.entries(markdownModules)) {
     const match = modulePath.match(/docs\/(sdk|site)\/(.+)\.md$/);
     if (!match) {
       continue;
@@ -117,15 +128,14 @@ export function processDocs(): DocumentationModel {
     const componentSlug = componentMatch?.[1];
     const availability = componentSlug ? getAvailability(componentSlug) : undefined;
     const fallbackLabel = componentSlug ?? documentPath.split('/').at(-1) ?? key;
-    const content = moduleContent as string;
 
     routesByKey.set(key, {
       path: `/${key}`,
       documentPath,
       source: source as 'sdk' | 'site',
-      content,
+      loadContent: createContentLoader(modulePath, loader as MarkdownLoader),
       label: fallbackLabel,
-      title: getTitle(content, fallbackLabel),
+      title: fallbackLabel,
       visible: !HIDDEN_DOCUMENT_KEYS.has(key),
       availability,
     });

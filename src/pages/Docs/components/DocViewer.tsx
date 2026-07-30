@@ -1,14 +1,65 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
 import type { DocRoute } from '../lib/processDocs';
-import { isExternalDocLink, resolveDocLink } from '../lib/resolveDocLink';
+import {
+  isExternalDocLink,
+  isInternalDocLink,
+  resolveDocLink,
+} from '../lib/resolveDocLink';
 
 interface DocViewerProps {
   route: DocRoute;
 }
 
 export function DocViewer({ route }: DocViewerProps) {
+  const [documentState, setDocumentState] = useState<{
+    path: string;
+    content: string | null;
+    error: Error | null;
+  }>({
+    path: route.path,
+    content: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    void route.loadContent().then(
+      (content) => {
+        if (isCurrent) {
+          setDocumentState({ path: route.path, content, error: null });
+        }
+      },
+      (error: unknown) => {
+        if (isCurrent) {
+          setDocumentState({
+            path: route.path,
+            content: null,
+            error: error instanceof Error ? error : new Error('无法加载文档内容。'),
+          });
+        }
+      },
+    );
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [route]);
+
+  if (documentState.path !== route.path || documentState.content === null) {
+    const error = documentState.path === route.path ? documentState.error : null;
+
+    return (
+      <div className="max-w-[860px] mx-auto py-10 px-6 text-gray-500 dark:text-gray-400">
+        {error ? `文档加载失败：${error.message}` : '正在加载文档…'}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[860px] mx-auto py-10 px-6 text-gray-900 dark:text-gray-100 text-base leading-relaxed">
       {route.availability && (
@@ -31,6 +82,11 @@ export function DocViewer({ route }: DocViewerProps) {
           a: ({ href = '', ...props }) => {
             const resolvedHref = resolveDocLink(href, route);
             const external = isExternalDocLink(resolvedHref);
+
+            if (isInternalDocLink(resolvedHref)) {
+              return <Link {...props} className="text-[#1677ff] hover:underline" to={resolvedHref} />;
+            }
+
             return (
               <a
                 {...props}
@@ -51,7 +107,7 @@ export function DocViewer({ route }: DocViewerProps) {
           code: CodeBlock,
         }}
       >
-        {route.content}
+        {documentState.content}
       </ReactMarkdown>
     </div>
   );
