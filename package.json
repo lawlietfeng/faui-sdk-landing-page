@@ -31,10 +31,10 @@
     "check-doc-links": "node scripts/check-doc-links.mjs"
   },
   "dependencies": {
-    "@lawlietfeng/faui-agent": "^1.0.1",
-    "@faui/react": "^0.0.2",
-    "antd": "^6.3.5",
     "@ant-design/icons": "^6.1.0",
+    "@faui/react": "^0.0.4",
+    "@lawlietfeng/faui-agent": "^1.0.2",
+    "antd": "5.24.4",
     "axios": "^1.15.0",
     "dayjs": "^1.11.20",
     "echarts": "^6.0.0",

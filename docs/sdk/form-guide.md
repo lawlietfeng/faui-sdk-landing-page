@@ -162,6 +162,38 @@
 
 在子组件上配置 `rules` 数组，当触发表单提交或输入时，引擎会自动校验这些规则。
 
+### 标签与必填标记
+
+表单字段需要使用内置 `text` 作为标签时，请将标签和字段放在同一父容器的 `children` 中，并保持 `text → 字段` 的直接相邻顺序：
+
+```json
+[
+  {
+    "id": "root",
+    "component": "form",
+    "children": ["email-item"]
+  },
+  {
+    "id": "email-item",
+    "component": "box",
+    "children": ["email-label", "email-input"]
+  },
+  {
+    "id": "email-label",
+    "component": "text",
+    "content": "邮箱"
+  },
+  {
+    "id": "email-input",
+    "component": "input",
+    "value": { "path": "/email" },
+    "rules": [{ "required": true, "message": "请输入邮箱" }]
+  }
+]
+```
+
+字段的 `rules` 中有 `required: true` 时，标签前会自动显示红色 `*`。不要手写星号；已有手写星号不会被删除，可能重复显示。字段隐藏时星号同步隐藏。标签不在 `form` 内、没有紧挨字段，或其 `text` ID 在整个 schema 的任意 `children` 中出现多次时，不会显示自动标记。
+
 ### 常用规则属性
 
 | 属性           | 说明                        | 示例                                              |

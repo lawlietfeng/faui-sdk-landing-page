@@ -7,6 +7,7 @@ import type { PageSchema } from '@lawlietfeng/faui-agent';
 import { Input, Button, Tabs, message, Collapse, Select } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, CopyOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import FauiThemeProvider from '../../setup/theme';
 import sdkSchemaPrompt from '../../../docs/sdk/faui-llm-prompt.md?raw';
 import { validateActivitiesInput } from '../JsonDebug/lib/validateActivities';
 
@@ -744,7 +745,9 @@ export default function AgentDemo() {
                 <div className="h-full overflow-auto p-4 bg-gray-50 dark:bg-gray-900">
                   {currentSchema.length > 0 ? (
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 min-h-[200px]">
-                      <MemoizedRenderer schema={currentSchema} />
+                      <FauiThemeProvider>
+                        <MemoizedRenderer schema={currentSchema} />
+                      </FauiThemeProvider>
                     </div>
                   ) : previewError ? (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">

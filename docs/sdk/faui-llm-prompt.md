@@ -59,10 +59,11 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
 
 1. **表单容器**：使用 `component: "form"`。
 2. **提交模式**：默认使用内部提交，`form` 配置 `submitButtonId`，其值必须严格等于提交按钮的 `id`。只有用户明确要求宿主页面外部提交时，才可省略 `submitButtonId` 和内部提交按钮，并通过 `Renderer` 的 `onSubmit` 接管请求。
-3. **字段标签 (Label)**：表单中的每一个输入字段，**必须**配备一个用于说明字段用途的标签（使用 `component: "text"`）。建议用一个 `box` 容器将 `text` 标签和对应的输入组件包裹起来，形成一个完整的表单项（Form Item）。
-4. **包含字段**：所有表单输入字段和标签的 `id` 必须包含在对应的容器 `children` 数组中；内部提交模式还必须包含提交按钮。
-5. **校验规则位置**：`rules` 数组（如 `[{ "required": true, "message": "必填" }]`）**绝对不能**写在 `form` 容器上，必须直接写在具体的子字段组件（如 `input`, `select`）上！
-6. **提交阻断**：校验不通过时，会自动阻断提交动作。
+3. **字段标签 (Label)**：表单中的每一个输入字段，**必须**配备一个用于说明字段用途的内置 `text` 标签。标签与字段必须是同一父容器的直接子项，并在 `children` 中严格按 `["label-id", "field-id"]` 排列；建议用 `box` 包裹这两个组件，形成一个完整的表单项。标签 `text` 的 ID 在整个 schema 的所有 `children` 中只能出现一次，不能被多个父容器复用，也不能在同一 `children` 中重复。
+4. **必填标记**：字段的 `rules` 中任一项为 `{ "required": true }` 时，紧邻在前的内置 `text` 标签会自动显示红色 `*`。不要在标签 `content` 中手写星号。字段的 `visible` 为 `false` 时，星号同步隐藏。
+5. **包含字段**：所有表单输入字段和标签的 `id` 必须包含在对应的容器 `children` 数组中；内部提交模式还必须包含提交按钮。
+6. **校验规则位置**：`rules` 数组（如 `[{ "required": true, "message": "必填" }]`）**绝对不能**写在 `form` 容器上，必须直接写在具体的子字段组件（如 `input`, `select`）上！
+7. **提交阻断**：校验不通过时，会自动阻断提交动作。
 
 外部提交的完整 API 和边界规则见 [`external-submit.md`](./external-submit.md)。
 

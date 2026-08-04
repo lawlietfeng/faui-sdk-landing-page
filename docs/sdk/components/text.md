@@ -82,6 +82,44 @@
 }
 ```
 
+## 表单标签与必填标记
+
+内置 `text` 在 `form` 内可以作为字段标签使用。标签与字段必须是同一父容器的直接子项，且 `children` 中的顺序必须是 `text` 在前、字段紧随其后。
+
+```json
+[
+  {
+    "id": "root",
+    "component": "form",
+    "children": ["name-item"]
+  },
+  {
+    "id": "name-item",
+    "component": "box",
+    "children": ["name-label", "name-input"]
+  },
+  {
+    "id": "name-label",
+    "component": "text",
+    "content": "姓名"
+  },
+  {
+    "id": "name-input",
+    "component": "input",
+    "rules": [{ "required": true, "message": "请输入姓名" }]
+  }
+]
+```
+
+满足以上结构时，紧随字段的 `rules` 中任一项为 `required: true`，标签前会自动显示红色 `*`。标记只由字段规则决定，请不要在 `content` 中手写星号；历史配置中的手写星号不会被自动删除，可能与自动标记重复显示。
+
+- 字段的 `visible` 解析为 `false` 时，星号同步隐藏。
+- `text` 不在 `form` 内、未紧挨字段，或其 ID 在整个 schema 的任意 `children` 中出现多次时，不会自动推断星号。
+- 紧邻字段可以是任意组件（包括宿主注册的自定义字段），只要它配置了 `rules.required: true`。
+- 宿主覆盖内置 `text` 组件后，必填标记由宿主实现。
+
+该标记仅用于视觉提示，`text` 仍是原生 `<span>`，不会与字段建立 HTML `label` / `htmlFor` 关联。
+
 ## 完整示例
 
 结合条件展示与样式的组合应用：
