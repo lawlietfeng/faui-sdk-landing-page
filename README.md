@@ -2,8 +2,6 @@
 
 FAUI SDK 的文档与演示站。站点覆盖 Form Edition、Full Edition、Actions、组件文档、Agent Demo 和 JSON Debug。
 
-在线预览：https://lawlietfeng.github.io/faui-sdk-landing-page/
-
 ## 页面
 
 | 页面 | 路径 | 说明 |
@@ -67,7 +65,7 @@ scripts/                    # 文档同步与链接检查
 
 ## 相关项目
 
-- [faui-sdk](https://github.com/lawlietfeng/faui-sdk)：React 与 Ant Design 的 JSON Schema UI 渲染 SDK。
+- `faui-sdk`：React 与 Ant Design 的 JSON Schema UI 渲染 SDK。
 - `@faui/react`：云效制品仓库中的 FAUI React SDK。
 - `@lawlietfeng/faui-agent`：Agent Demo 使用的工具调用协议实现。
 

@@ -7,6 +7,7 @@ import type { DocRoute } from '../lib/processDocs';
 import {
   isExternalDocLink,
   isInternalDocLink,
+  isSdkSourceLink,
   resolveDocLink,
 } from '../lib/resolveDocLink';
 
@@ -80,6 +81,10 @@ export function DocViewer({ route }: DocViewerProps) {
           ol: (props) => <ol className="mb-4 pl-6 list-decimal text-gray-700 dark:text-gray-300" {...props} />,
           li: (props) => <li className="mb-2" {...props} />,
           a: ({ href = '', ...props }) => {
+            if (isSdkSourceLink(href, route)) {
+              return <span>{props.children}</span>;
+            }
+
             const resolvedHref = resolveDocLink(href, route);
             const external = isExternalDocLink(resolvedHref);
 

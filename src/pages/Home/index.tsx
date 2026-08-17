@@ -4,7 +4,6 @@ import {
   BarChartOutlined,
   BookOutlined,
   DatabaseOutlined,
-  GithubOutlined,
   LayoutOutlined,
   RobotOutlined,
   SafetyCertificateOutlined,
@@ -104,15 +103,6 @@ export default function Home() {
               <BookOutlined className="text-lg transition-transform group-hover:scale-110" />
               阅读开发文档
             </button>
-            <a
-              href="https://github.com/lawlietfeng/faui-sdk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative flex items-center justify-center gap-2 h-14 px-8 text-base font-medium rounded-full bg-white/50 dark:bg-black/50 !text-gray-700 dark:!text-gray-200 border border-black/10 dark:border-white/10 backdrop-blur-md hover:bg-gray-50 dark:hover:bg-white/5 hover:-translate-y-0.5 transition-all duration-300 no-underline"
-            >
-              <GithubOutlined className="text-lg transition-transform group-hover:scale-110" />
-              SDK GitHub
-            </a>
           </div>
         </section>
 

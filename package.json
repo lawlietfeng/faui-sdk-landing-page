@@ -8,11 +8,6 @@
   },
   "license": "Apache-2.0",
   "author": "lawliet",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lawlietfeng/faui-sdk-landing-page.git"
-  },
-  "homepage": "https://github.com/lawlietfeng/faui-sdk-landing-page#readme",
   "keywords": [
     "faui",
     "json-schema",
@@ -32,7 +27,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@faui/react": "^0.0.4",
+    "@faui/react": "^0.0.5",
     "@lawlietfeng/faui-agent": "^1.0.2",
     "antd": "5.24.4",
     "axios": "^1.15.0",
