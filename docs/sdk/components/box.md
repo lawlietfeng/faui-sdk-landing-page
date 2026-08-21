@@ -12,14 +12,33 @@ box 组件是 FAUI 中最基础、最常用的布局容器，它的行为类似�
 
 ### 属性总览
 
-| 属性名    | 类型                         | 默认值       | 说明                               |
-| --------- | ---------------------------- | ------------ | ---------------------------------- |
-| `layout`  | `'vertical' \| 'horizontal'` | `'vertical'` | 内部子组件的排列方向。             |
-| `spacing` | `number`                     | `0`          | 子组件之间的间距（即 flex gap）。  |
-| `padding` | `number \| string`           | `0`          | 容器的内边距。                     |
-| `align`   | `string`                     | -            | 侧轴（交叉轴）对齐方式。           |
-| `justify` | `string`                     | -            | 主轴对齐方式。                     |
-| `children`| `string[]`                   | `[]`         | 内部包裹的子组件 ID 数组。         |
+<!-- contract-props:start -->
+## Form 契约属性（box）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `padding` |  | 静态值 |  |  |
+| `layout` |  | 静态值 |  |  |
+| `spacing` |  | 静态值 |  |  |
+| `align` |  | 静态值 |  |  |
+| `justify` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 

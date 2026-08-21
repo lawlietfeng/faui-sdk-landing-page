@@ -10,15 +10,37 @@
 
 ## 核心属性
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| min | `number \| string` | `0` | 最小值（支持 `useExpression` 插值） |
-| max | `number \| string` | `100` | 最大值（支持 `useExpression` 插值） |
-| step | `number \| string` | `1` | 每次拖动的最小单位步长（支持 `useExpression` 插值） |
-| range | `boolean \| string` | `false` | 是否开启双滑块模式，开启后返回范围数组（支持 `useExpression` 插值） |
-| disabled | `boolean \| string` | `false` | 是否禁用滑块（支持 `useExpression` 插值） |
-| value.path | `string` | - | 绑定的数据源路径 |
-| on_change | `ActionConfig` | - | 值变化时触发的事件（未配置且有 path 时自动触发 update_data）。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
+<!-- contract-props:start -->
+## Form 契约属性（slider）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `min` |  | 静态值 |  |  |
+| `max` |  | 静态值 |  |  |
+| `step` |  | 静态值 |  |  |
+| `range` |  | 静态值 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（number | array | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### min / max（最小值/最大值）
 

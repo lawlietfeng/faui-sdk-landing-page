@@ -10,14 +10,34 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | 双向绑定的数据路径。配合 `on_change` 实现输入回写。 |
-| `on_change` | `ActionConfig` | - | 文本改变时触发的动作。如果不配置但配置了 `value.path`，将默认执行回写数据的 fallback 操作。自定义 `on_change` 时，可通过 `${$value}` 引用组件的最新值。如果 on_change 中未设置 `value` 字段，组件会自动注入当前值；如果设置了自定义 `value` 表达式，组件会保留你的表达式不覆盖。 |
-| `placeholder` | `string` | - | 输入框为空时的提示文字，支持表达式插值。 |
-| `rules` | `FormRule[]` | - | 配合 `form` 校验的规则数组。 |
-| `validateTrigger` | `string` \| `string[]` | `"onChange"` | 触发校验的时机。可选值有 `"onChange"` 和 `"onBlur"`。 |
-| `field` | `string` | - | 表单注册的字段名，默认为 `value.path` 或 `id`。 |
+<!-- contract-props:start -->
+## Form 契约属性（input）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `placeholder` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### value.path 与 on_change（数据双向绑定）
 

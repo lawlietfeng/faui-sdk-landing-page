@@ -10,12 +10,30 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `content` | `string` | - | 标签内显示的文本内容，支持插值表达式 |
-| `label` | `string` | - | 功能同 `content`，推荐优先使用 `content` |
-| `color` | `string` | - | 标签的颜色。支持预设语义色或十六进制色值 |
-| `bordered` | `boolean` \| `string` | `true` | 是否展示边框 |
+<!-- contract-props:start -->
+## Form 契约属性（tag）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `content` |  | `expression` | 组件显示的文本内容。 |  |
+| `color` |  | 静态值 |  |  |
+| `bordered` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### content（标签内容）
 

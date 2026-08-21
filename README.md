@@ -38,6 +38,10 @@ npm run sync-docs:check
 npm run check-doc-links
 ```
 
+同步 SDK 文档后，`check-doc-navigation` 会检查每篇文档是否已经明确决定进入导航，还是仅保留为隐藏文档。新增文档如果没有配置，会输出“建议进入列表 / 建议不进入列表 / 需要人工确认”，并阻止构建。
+
+导航策略统一维护在 [`docs/doc-navigation.json`](./docs/doc-navigation.json)：用户指南和 Action 放在 `listed`，内部方案、协议提示词等放在 `hidden`；组件分类也维护在同一文件中。
+
 ## 验证
 
 ```bash

@@ -10,18 +10,39 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `checked` | `ValueBinding` | - | **推荐**。通过 `path` 双向绑定开关的布尔值状态 |
-| `value` | `ValueBinding` | - | 功能同 `checked`，也可用于状态绑定 |
-| `on_change` | `ActionConfig` | - | 状态改变时触发的动作。如果不配置但绑定了路径，引擎会自动回写状态。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `checkedChildren` | `string` | - | 开启状态下显示的文本内容 |
-| `unCheckedChildren` | `string` | - | 关闭状态下显示的文本内容 |
-| `disabled` | `boolean` \| `string` | `false` | 是否禁用开关 |
-| `size` | `string` | `"default"` | 开关大小，可选 `"small"`、`"default"` |
-| `rules` | `FormRule[]` | - | 在 `form` 中使用时的表单校验规则 |
+<!-- contract-props:start -->
+## Form 契约属性（switch）
 
-### checked.path / value.path（数据绑定）
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `checkedChildren` |  | 静态值 |  |  |
+| `unCheckedChildren` |  | 静态值 |  |  |
+| `checked` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `size` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` | （已弃用：checked） |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`checked`（boolean）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
+
+### checked.path（数据绑定）
 
 通过指定路径与全局状态进行双向绑定。在没有配置 `on_change` 的情况下，引擎会自动监听开关的切换并触发 `update_data` 回写对应路径的值。
 
@@ -129,7 +150,7 @@
 ## 新手常见问题
 
 **Q: 为什么我切换开关，页面上的数据没有更新？**
-- 请检查是否配置了 `checked.path` 或 `value.path` 绑定全局状态。如果没有绑定路径，引擎不知道将新的布尔值写回何处，从而导致双向绑定失效。
+- 请检查是否配置了 `checked.path` 绑定全局状态。如果没有绑定路径，引擎不知道将新的布尔值写回何处，从而导致双向绑定失效。历史 `value.path` 仍兼容但已弃用。
 
 **Q: 开关的默认状态怎么设置？**
 - 开关的状态完全由其绑定的 `dataModel` 中的数据决定。在初始的 `dataModel` 中给对应路径赋布尔值即可，如 `{"settings": {"email": true}}`。

@@ -9,21 +9,44 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `visible` | `boolean \| ValueBinding` | `true` | 控制骨架屏的显示状态（通常绑定为 `isLoading` 状态） |
-| `active` | `boolean \| string` | `false` | 是否展示骨架屏的闪烁/流动动画 |
-| `skeletonType` | `'button' \| 'avatar' \| 'input' \| 'image' \| 'node'` | - | 指定渲染为一个独立的特殊形状骨架 |
-| `avatar` | `boolean \| object \| string` | `false` | 默认综合骨架中，是否包含头像占位图 |
-| `paragraph` | `boolean \| object \| string` | `true` | 默认综合骨架中，是否包含段落占位图 |
-| `title` | `boolean \| object \| string` | `true` | 默认综合骨架中，是否包含标题占位图 |
-| `round` | `boolean \| string` | `false` | 段落和标题是否显示为圆角 |
+<!-- contract-props:start -->
+## Form 契约属性（skeleton）
 
-### visible（加载状态控制）
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `loading` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  | `true` |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | （已弃用：loading） |  |
+| `active` |  | 静态值 |  |  |
+| `avatar` |  | 静态值 |  |  |
+| `paragraph` |  | 静态值 |  |  |
+| `round` |  | 静态值 |  |  |
+| `title` |  | 静态值 |  |  |
+| `skeletonType` |  | 静态值 |  |  |
+| `shape` |  | 静态值 |  |  |
+| `block` |  | 静态值 |  |  |
+| `size` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
 
-`visible` 属性在 `skeleton` 中有特殊的行为：它实际上控制的是**是否处于加载状态**。
-1. **当 `visible` 为 `true`（或绑定的值为真）时**：显示骨架屏的灰色占位图，隐藏内部包裹的真实 `children`。
-2. **当 `visible` 为 `false`（或绑定的值为假）时**：骨架屏占位图消失，组件会直接渲染并显示内部真实的 `children` 内容。
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：独立骨架形态不渲染 children，不能配置 loading。
+- 特殊说明：无
+<!-- contract-props:end -->
+
+### loading（加载状态控制）
+
+`loading` 控制是否处于加载状态。
+1. **当 `loading` 为 `true`（或绑定的值为真）时**：显示骨架屏的灰色占位图，隐藏内部包裹的真实 `children`。
+2. **当 `loading` 为 `false`（或绑定的值为假）时**：骨架屏占位图消失，组件会直接渲染并显示内部真实的 `children` 内容。
 
 通常我们会将它绑定到全局的请求状态标识上：
 
@@ -31,13 +54,15 @@
 {
   "component": "skeleton",
   "id": "user-info-skeleton",
-  "visible": {
+  "loading": {
     "path": "/api/loading"
   },
   "active": true,
   "children": ["user-avatar", "user-name", "user-desc"]
 }
 ```
+
+历史 `visible` 在 Skeleton 中仍兼容为 loading 别名，但已弃用。若要控制 Skeleton 整体显隐，请在外层 `box` 使用 `visible`，不要把 Skeleton 的 `visible` 当作普通组件显隐。
 
 ### active（动画效果）
 
@@ -48,7 +73,7 @@
   "component": "skeleton",
   "id": "skeleton-active",
   "active": true,
-  "visible": true
+  "loading": true
 }
 ```
 
@@ -92,7 +117,7 @@
 {
   "component": "skeleton",
   "id": "skeleton-complex",
-  "visible": {
+  "loading": {
     "path": "/page/isFetching"
   },
   "active": true,
@@ -112,7 +137,7 @@
 ## 新手常见问题
 
 **Q: 为什么我配置了 `skeleton`，但页面上不仅显示了骨架屏，还把里面真实的组件也显示出来了？**
-- 在 FAUI 的实现中，`visible` 为 `true` 时，引擎会通知底层 Ant Design 渲染 `loading=true`。如果你不小心把 `visible` 绑定反了，或者通过其他方式强制渲染了 `children`，可能会导致重叠。请检查你的 `visible.path` 是否正确反映了 loading 状态。
+- 请确认 `loading` 为 `true` 时由 Skeleton 接管真实 `children`。如果需要控制整个 Skeleton 的显隐，请把它放在外层 `box` 中并设置外层的 `visible`。
 
 **Q: 骨架屏的行数怎么调整？**
 - 如果是普通的综合骨架，可以将 `paragraph` 配置为一个对象，指定 `rows` 属性，如 `"paragraph": { "rows": 6 }`。

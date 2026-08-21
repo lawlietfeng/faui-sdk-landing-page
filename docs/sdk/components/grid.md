@@ -12,13 +12,32 @@
 
 `row` 组件是栅格系统的外层容器。
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `gutter` | `number \| [number, number]` | `0` | 栅格间隔。传入数字表示水平间距，传入数组 `[水平间距, 垂直间距]` 表示水平与垂直间距 |
-| `align` | `string` | `top` | 垂直对齐方式，可选 `top`、`middle`、`bottom`、`stretch` |
-| `justify` | `string` | `start` | 水平排列方式，可选 `start`、`end`、`center`、`space-around`、`space-between` 等 |
-| `wrap` | `boolean` | `true` | 当子列总宽度超过 24 时，是否自动换行 |
-| `children` | `string[]` | `[]` | 子组件（通常必须为 `col` 组件）的 ID 数组 |
+<!-- contract-props:start -->
+## Form 契约属性（grid）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `wrap` |  | 静态值 |  |  |
+| `gutter` |  | 静态值 |  |  |
+| `align` |  | 静态值 |  |  |
+| `justify` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### gutter（间距）
 

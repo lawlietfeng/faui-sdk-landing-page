@@ -9,13 +9,34 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value` | `ValueBinding` | - | 双向绑定的数据路径，用于回显和写入当前选中的值 |
-| `options` | `Array \| string` | - | 选项列表，支持通过插值表达式动态获取数组 |
-| `on_change` | `ActionConfig` | - | 选中项发生变化时的回调动作。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `rules` | `FormRule[]` | - | 表单校验规则，支持必填等校验 |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | 触发校验的时机 |
+<!-- contract-props:start -->
+## Form 契约属性（radio）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `options` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | number | boolean | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### options（选项列表）
 
@@ -104,7 +125,7 @@
     {
       "action": "update_data",
       "path": "/filter/status",
-      "value": "${value}"
+      "value": "${$value}"
     },
     {
       "action": "http_proxy",

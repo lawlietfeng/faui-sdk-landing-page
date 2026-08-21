@@ -10,14 +10,34 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `vertical` | `boolean` | `false` | 主轴是否为垂直方向（相当于 `flex-direction: column`） |
-| `gap` | `number \| string` | - | 子元素之间的间隙大小 |
-| `align` | `string` | - | 交叉轴（副轴）上的对齐方式 |
-| `justify` | `string` | - | 主轴上的对齐方式 |
-| `wrap` | `boolean \| string` | `false` | 子元素超出容器时是否换行 |
-| `flex` | `number \| string` | - | 当作为其他弹性容器的子节点时，自身分配空间的比例 |
+<!-- contract-props:start -->
+## Form 契约属性（flex）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `vertical` |  | 静态值 |  |  |
+| `wrap` |  | 静态值 |  |  |
+| `gap` |  | 静态值 |  |  |
+| `flex` |  | 静态值 |  |  |
+| `align` |  | 静态值 |  |  |
+| `justify` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### vertical（排列方向）
 

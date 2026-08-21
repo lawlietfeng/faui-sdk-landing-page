@@ -4,6 +4,7 @@ import {
   documentedComponentSlugs,
   fullComponentSlugs,
 } from '../componentCategories';
+import navigationPolicyRaw from '../../../../docs/doc-navigation.json?raw';
 
 const markdownModules = import.meta.glob('../../../../docs/{sdk,site}/**/*.md', {
   query: '?raw',
@@ -15,34 +16,27 @@ type MarkdownLoader = () => Promise<string>;
 // 每篇 Markdown 都作为独立模块按需加载；缓存可避免重复访问同一篇文档。
 const markdownContentCache = new Map<string, Promise<string>>();
 
-const GUIDES_AND_REFERENCE = [
-  ['sdk/development', '开发者指南'],
-  ['sdk/npm-usage', 'SDK 使用指南'],
-  ['sdk/form-guide', 'Form 表单指南'],
-  ['sdk/external-submit', '外部校验与提交'],
-  ['site/http-request', 'HTTP 请求与后端中转'],
-  ['site/lifecycle', '组件与 Action 生命周期'],
-  ['sdk/lifecycle-types', 'Activity 与 JSON Patch'],
-  ['sdk/animation', 'Animation'],
-  ['sdk/component-doc-standard', '组件文档规范'],
-] as const;
+interface NavigationPolicyEntry {
+  key: string;
+  label: string;
+  section: 'guides-and-reference' | 'actions';
+}
 
-const BUILT_IN_ACTIONS = [
-  ['sdk/actions/update_data', 'update_data'],
-  ['sdk/actions/http_proxy', 'http_proxy'],
-  ['sdk/actions/message', 'message'],
-  ['sdk/actions/notification', 'notification'],
-] as const;
+interface NavigationPolicy {
+  listed: NavigationPolicyEntry[];
+  hidden: string[];
+}
+
+const navigationPolicy = JSON.parse(navigationPolicyRaw) as NavigationPolicy;
+const GUIDES_AND_REFERENCE = navigationPolicy.listed
+  .filter((item) => item.section === 'guides-and-reference')
+  .map(({ key, label }) => [key, label] as const);
+const BUILT_IN_ACTIONS = navigationPolicy.listed
+  .filter((item) => item.section === 'actions')
+  .map(({ key, label }) => [key, label] as const);
 
 // 这些文档保留为可直接访问的页面，但不进入站点导航或搜索结果。
-const HIDDEN_DOCUMENT_KEYS = new Set([
-  'sdk/faui-llm-prompt',
-  'sdk/actions/README',
-  'sdk/actions/copy',
-  'sdk/actions/mcp_tool_call',
-  'sdk/actions/send_prompt',
-  'sdk/actions/input_prompt',
-]);
+const HIDDEN_DOCUMENT_KEYS = new Set(navigationPolicy.hidden);
 
 export type ComponentAvailability = 'form-full' | 'full';
 

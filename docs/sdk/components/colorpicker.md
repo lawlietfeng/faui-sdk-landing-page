@@ -12,15 +12,33 @@
 
 ### 属性总览
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | **核心**：双向绑定的数据路径，通常绑定为十六进制颜色字符串。 |
-| `field` | `string` | - | 表单字段名（可选），如果未提供则默认使用 `value.path` 或 `id`。 |
-| `on_change` | `ActionConfig` | - | 值变化时触发的动作。如果不配置，组件会自动 fallback 执行 `update_data` 更新 `value.path` 对应的数据。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `rules` | `FormRule[]` | - | 表单校验规则（如必填、正则校验等）。 |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | 触发校验的时机。 |
-| `style` | `object` | - | 自定义内联样式。 |
-| `className` | `string` | - | 自定义 CSS 类名。 |
+<!-- contract-props:start -->
+## Form 契约属性（colorpicker）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### value.path（数据绑定）
 
@@ -38,7 +56,7 @@
 
 ### on_change（值变化事件）
 
-颜色发生变化时触发的动作回调。局部变量 `${value}` 为选中颜色的十六进制字符串。
+颜色发生变化时触发的动作回调。局部变量 `${$value}` 为选中颜色的十六进制字符串。
 > 💡 **提示**：如果在配置中声明了 `value.path` 但没有显式配置 `on_change`，引擎也会自动帮你 fallback 执行数据的回写。
 
 ```json
@@ -51,7 +69,7 @@
   "on_change": {
     "action": "update_data",
     "path": "/themeColor",
-    "value": "${value}"
+    "value": "${$value}"
   }
 }
 ```

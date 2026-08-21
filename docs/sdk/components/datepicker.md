@@ -12,20 +12,38 @@
 
 ### 属性总览
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | **核心**：双向绑定的数据路径，绑定的值为格式化后的日期字符串。 |
-| `picker` | `'date' \| 'month' \| 'year'` | `'date'` | 选择器类型。 |
-| `format` | `string` | - | 日期格式化字符串，如 `YYYY-MM-DD`。默认会根据 `picker` 和 `showTime` 自动适配。 |
-| `showTime` | `boolean` | `false` | 是否同时显示时间选择器（仅当 `picker` 为 `date` 时有效）。 |
-| `placeholder` | `string` | - | 输入框占位提示文字。 |
-| `disabledDate` | `object` | - | 日期禁用规则，支持 `before` 和 `after` 约束。详见下方说明。 |
-| `field` | `string` | - | 表单字段名（可选），未提供则默认使用 `value.path` 或 `id`。 |
-| `on_change` | `ActionConfig` | - | 值变化时触发的动作。如果不配置，组件会自动 fallback 执行 `update_data` 更新对应数据。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `rules` | `FormRule[]` | - | 表单校验规则（如必填验证等）。 |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | 触发校验的时机。 |
-| `style` | `object` | - | 自定义内联样式。 |
-| `className` | `string` | - | 自定义 CSS 类名。 |
+<!-- contract-props:start -->
+## Form 契约属性（datepicker）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `placeholder` |  | `expression` |  |  |
+| `picker` |  | 静态值 |  |  |
+| `format` |  | 静态值 |  |  |
+| `showTime` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `disabledDate` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### picker（选择器类型）
 
@@ -81,7 +99,7 @@
 
 ### value.path 与 on_change（数据绑定）
 
-通过 `value.path` 绑定全局状态。当选择日期时，触发 `on_change`（局部变量 `${value}` 为格式化后的字符串）。
+通过 `value.path` 绑定全局状态。当选择日期时，触发 `on_change`（局部变量 `${$value}` 为格式化后的字符串）。
 > 💡 **提示**：如果只声明 `value.path` 而不写 `on_change`，引擎也会自动执行更新回写。
 
 ```json
@@ -94,7 +112,7 @@
   "on_change": {
     "action": "update_data",
     "path": "/startDate",
-    "value": "${value}"
+    "value": "${$value}"
   }
 }
 ```

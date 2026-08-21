@@ -33,7 +33,7 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
 
 **极其重要**：FAUI 中的绝大多数输入组件必须实现数据双向绑定。
 
-- **路径格式**：`path` 的值**必须以** **`/`** **开头**（例如 `/name`，`/formData/name`）。**严禁使用** **`./`** **开头**！
+- **路径格式**：根数据模型的 `path` 必须以 `/` 开头（例如 `/name`、`/formData/name`）。只有 Repeater 模板子组件可以使用 `./field` 相对当前项绑定。
 - **读取**：使用 `value: { "path": "/fieldName" }` 读取数据。
 - **更新与 Fallback 机制**：FAUI 内置了数据双向绑定的 Fallback 回写机制。只要正确配置了 `value: { "path": "/fieldName" }`，即使不写 `on_change`，引擎也会自动将用户输入同步回数据模型中。
 - **自定义更新**：如果需要在值改变时触发额外逻辑，可以显式配置 `on_change`：
@@ -44,15 +44,26 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
   "on_change": {
     "action": "update_data",
     "path": "/fieldName",
-    "value": "${value}"
+    "value": "${$value}"
   }
 }
 ```
 
 **注意**：使用 `update_data` 动作时，`path` 和 `value` 是直接放在动作对象里的，**不要**错误地将它们包裹在 `payload` 对象中。
-**严禁**直接将值写死为 `value: "xxx"`，必须使用 `{ "path": "/xxx" }` 对象结构。
+**严禁**直接将表单数据属性写成 `value: "xxx"`，必须使用 `{ "path": "/xxx" }` 对象结构；是否支持该绑定以 Form 契约为准。
 
-## 3. Form 表单核心规则 (Form Core Rules)
+## 3. Form 动态属性规则 (Form Dynamic Property Rules)
+
+- 普通 `visible`、`disabled` 和 `condition.when` 支持 `boolean`、纯表达式或 `{ "path": ... }`。
+- `condition.match` 支持静态标量、纯表达式或 `{ "path": ... }`；`when` 与 `match` 两种模式不能混用。
+- `value`、`checked`、`data` 只使用契约声明的 `{ "path": ... }` 绑定。
+- `skeleton` 使用 `loading` 控制加载状态；历史 `visible` 仅为兼容别名。需要整体显隐时，在外层 `box` 使用 `visible`。
+- 表达式只使用 `$root`、`$current`、`$parent`；事件动作额外使用 `$value`。不生成 `{ "not": ... }`，反向逻辑写成 `${!$root.field}`。
+- 绑定字段必须在 `dataModel` 中有初始值；`./field` 只能出现在 Repeater 模板子树。
+
+组件属性、事件和 children 规则以 `@faui/react/manifest` 的 `formComponentContracts` 为准。可以在交付前运行 `node scripts/validate-schema.cjs --mode=form-strict schema.json`。
+
+## 4. Form 表单核心规则 (Form Core Rules)
 
 **严禁裸奔**：如果业务是一个表单（如“请假申请”、“资料填写”），**必须**使用 `component: "form"` 将所有字段包裹起来，不要直接用 `box` 替代表单容器！
 如果要生成表单，必须严格遵守以下结构：
@@ -67,7 +78,7 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
 
 外部提交的完整 API 和边界规则见 [`external-submit.md`](./external-submit.md)。
 
-## 4. 高频组件避坑指南 (Component Specific Precautions)
+## 5. 高频组件避坑指南 (Component Specific Precautions)
 
 请严格根据以下各组件的注意事项生成配置：
 
@@ -86,7 +97,7 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
   - **`checkbox`** **(多选)**：**场景**：用于允许选中多项（如“兴趣爱好”），或者单个布尔开关（如“同意/不同意协议”、“是否加急”）。
   - `radio` 和 `select` **必须提供** **`options`** **数组**，格式为 `[{ "label": "显示文本", "value": "实际值" }]`。
   - 对于 `checkbox` 或 `switch`（布尔开关），**强制要求**：数据绑定推荐使用 `checked: { "path": "/xxx" }`，而不是 `value`。同样支持 Fallback 自动更新。
-  - 若显式配置 `on_change`，依然使用 `value: "${value}"`，此时 `${value}` 的实际值是 `true` 或 `false`。
+  - 若显式配置 `on_change`，使用 `${$value}` 读取本次变更值。
   - 如果用于协议勾选，`rules` 配置为 `[{ "required": true, "message": "请勾选" }]`。
 - **`cascader`** **/** **`treeselect`** **/** **`transfer`** **(复杂选择)**：
   - **场景**：`cascader` 适用于级联数据（如省市区选择）；`treeselect` 适用于树状层级选择（如复杂的组织架构）；`transfer` 适用于在两个列表间进行分配（如给用户分配角色）。
@@ -94,8 +105,8 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
   - 必须提供树形或列表形的 `options` 数据源。
 - **`upload`** **(文件上传)**：
   - **场景**：用于上传图片、附件、凭证等文件。
-  - `on_change` 中的变量必须使用 `"${fileList}"`，而不是 `"${value}"`！
-  - 示例：`"on_change": { "action": "update_data", "path": "/files", "value": "${fileList}" }`。
+  - `on_change` 中统一使用 `"${$value}"` 读取文件列表，不再生成 `${fileList}` 特例。
+  - 示例：`"on_change": { "action": "update_data", "path": "/files", "value": "${$value}" }`。
 - **`datepicker`** **/** **`timepicker`** **(日期时间)**：
   - **场景**：用于选择日期（如“出生日期”、“出发日期”）或时间（如“开会时间”）。
   - 数据绑定：`value: { "path": "/xxx" }`。
@@ -119,7 +130,7 @@ You are an expert frontend developer and FAUI framework specialist. Your task is
   - **切勿使用** **`content`** **属性来设置按钮文字！** 否则生成的按钮将没有文字展示。
   - 按钮的点击事件必须使用 **`on_tap`**，**严禁使用** **`on_click` 等驼峰命名事件**！弹窗等组件的确定/取消事件必须使用 `on_ok` / `on_cancel` 等下划线命名。
 
-## 5. HTTP 请求与提交 (HTTP Request & Submit)
+## 6. HTTP 请求与提交 (HTTP Request & Submit)
 
 按钮（`button`）的配置和点击事件通常用于发起请求：
 

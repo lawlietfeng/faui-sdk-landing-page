@@ -9,15 +9,35 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `title` | `string` | - | 卡片标题，支持插值表达式 |
-| `content` | `string` | - | 卡片正文内容，支持插值表达式 |
-| `placement` | `string` | `'top'` | 气泡框相对于触发元素的弹出位置 |
-| `trigger` | `string \| string[]` | `'hover'` | 触发行为，支持插值表达式 |
-| `open` | `boolean \| ValueBinding` | - | 是否受控显示气泡卡片，支持双向绑定 |
-| `arrow` | `boolean \| string` | `true` | 是否显示指向触发元素的箭头 |
-| `children` | `string[]` | - | 必须配置子节点（通常为 `button` 或 `icon` 等），作为触发卡片的锚点 |
+<!-- contract-props:start -->
+## Form 契约属性（popover）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `title` |  | `expression` | 组件显示的文本内容。 |  |
+| `content` |  | `expression` | 组件显示的文本内容。 |  |
+| `placement` |  | 静态值 |  |  |
+| `trigger` |  | 静态值 |  |  |
+| `open` |  | `boolean`, `path`, 路径：`root-or-repeater-relative` |  |  |
+| `on_open_change` |  | 静态值 |  |  |
+| `arrow` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`trigger-component-ids`
+- 事件：`on_open_change`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### title & content（标题与内容）
 

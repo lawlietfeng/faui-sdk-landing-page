@@ -4,7 +4,7 @@ import { Renderer } from '@faui/react/full';
 import type { ActionConfig, ActivitySnapshot, Content, HttpRequestConfig } from '@faui/react/full';
 import { FauiAgent, TOOL_SYSTEM_PROMPT } from '@lawlietfeng/faui-agent';
 import type { PageSchema } from '@lawlietfeng/faui-agent';
-import { Input, Button, Tabs, message, Collapse, Select } from 'antd';
+import { Input, Button, Tabs, message, Collapse, Modal, Select } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, CopyOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import FauiThemeProvider from '../../setup/theme';
@@ -30,6 +30,7 @@ interface AgentConfig {
   provider: string;
   model: string;
   baseUrl: string;
+  uiStylePrompt: string;
 }
 
 interface ProviderMeta {
@@ -40,7 +41,7 @@ interface ProviderMeta {
   hint?: string;
 }
 
-const DEFAULT_PROVIDER = 'anthropic';
+const DEFAULT_PROVIDER = 'openai';
 
 const AGENT_SYSTEM_PROMPT = `${TOOL_SYSTEM_PROMPT}
 
@@ -48,10 +49,20 @@ const AGENT_SYSTEM_PROMPT = `${TOOL_SYSTEM_PROMPT}
 
 以下内容来自本地 faui-sdk 的 faui-llm-prompt.md，是组件、字段、Action 和数据绑定规则的唯一来源。
 当它与 Agent 的默认 Schema 语义冲突时，以此规则为准；但继续使用上方的工具调用协议。
-Agent 的工具传输对象保持 PageSchema（components + dataModel），宿主会在预览前将其转换为 ActivitySnapshot。
 当前预览使用 Full Edition 注册表，因此 table、list、chart 和 animation 配置可用于预览；其字段仍须遵循 SDK 文档。
 
-${sdkSchemaPrompt}`;
+${sdkSchemaPrompt}
+
+## Agent 工具输出约束（最高优先级）
+
+SDK 文档中的 ActivitySnapshot 数组是宿主最终交给 Renderer 的完整 JSON。Agent 的工具调用只生成其中的 content：
+
+{
+  "components": [...],
+  "dataModel": { ... }
+}
+
+不要在工具参数中嵌套 ACTIVITY_SNAPSHOT 或外层数组；宿主会自动补齐它们。`;
 
 const EXTENDED_ACTION_TYPES = new Set(['copy', 'mcp_tool_call', 'send_prompt', 'input_prompt']);
 
@@ -71,154 +82,65 @@ function validatePageSchema(schema: PageSchema) {
 
 const SUPPORTED_PROVIDERS: ProviderMeta[] = [
   {
-    value: 'anthropic',
-    label: 'Anthropic',
-    defaultModel: 'claude-sonnet-4-20250514',
-    defaultBaseUrl: 'https://api.anthropic.com',
-  },
-  {
     value: 'openai',
     label: 'OpenAI',
-    defaultModel: 'gpt-4.1',
+    defaultModel: 'gpt-5.6',
     defaultBaseUrl: 'https://api.openai.com/v1',
   },
   {
     value: 'openai-compatible',
     label: 'OpenAI Compatible',
-    defaultModel: 'gpt-4.1-mini',
-    hint: '适用于 Ollama、vLLM、LM Studio 或自建网关，通常需要同时填写 Base URL。',
-  },
-  {
-    value: 'google',
-    label: 'Google',
-    defaultModel: 'gemini-2.0-flash',
-    defaultBaseUrl: 'https://generativelanguage.googleapis.com/v1beta',
-  },
-  {
-    value: 'xai',
-    label: 'xAI',
-    defaultModel: 'grok-2-latest',
-    defaultBaseUrl: 'https://api.x.ai/v1',
-  },
-  {
-    value: 'groq',
-    label: 'Groq',
-    defaultModel: 'llama-3.3-70b-versatile',
-    defaultBaseUrl: 'https://api.groq.com/openai/v1',
-  },
-  {
-    value: 'mistral',
-    label: 'Mistral',
-    defaultModel: 'codestral-latest',
-    defaultBaseUrl: 'https://api.mistral.ai/v1',
-  },
-  {
-    value: 'openrouter',
-    label: 'OpenRouter',
-    defaultModel: 'anthropic/claude-3.5-sonnet',
-    defaultBaseUrl: 'https://openrouter.ai/api/v1',
-  },
-  {
-    value: 'azure-openai-responses',
-    label: 'Azure OpenAI (Responses)',
-    defaultModel: 'gpt-4.1',
-    hint: '通常需要填写 Azure endpoint / deployment，对应的 Model 往往是你自己的 deployment 名称。',
-  },
-  {
-    value: 'amazon-bedrock',
-    label: 'Amazon Bedrock',
-    defaultModel: 'anthropic.claude-3-5-haiku-20241022-v1:0',
-    defaultBaseUrl: 'https://bedrock-runtime.us-east-1.amazonaws.com',
-    hint: '通常依赖 AWS 环境凭证或角色，不一定使用普通 API Key。',
-  },
-  {
-    value: 'google-vertex',
-    label: 'Google Vertex',
-    defaultModel: 'gemini-2.0-flash',
-    defaultBaseUrl: 'https://{location}-aiplatform.googleapis.com',
-    hint: '通常依赖 Google ADC / Vertex 凭证，Base URL 里的 {location} 需要替换成你的区域。',
-  },
-  {
-    value: 'google-gemini-cli',
-    label: 'Google Gemini CLI',
-    defaultModel: 'gemini-2.5-flash',
-    defaultBaseUrl: 'https://cloudcode-pa.googleapis.com',
-    hint: '通常依赖 OAuth 登录，不是普通 API Key。',
-  },
-  {
-    value: 'google-antigravity',
-    label: 'Google Antigravity',
-    defaultModel: 'gemini-3-flash',
-    defaultBaseUrl: 'https://daily-cloudcode-pa.sandbox.googleapis.com',
-    hint: '通常依赖 OAuth 登录，不是普通 API Key。',
-  },
-  {
-    value: 'openai-codex',
-    label: 'OpenAI Codex',
-    defaultModel: 'gpt-5.2-codex',
-    defaultBaseUrl: 'https://chatgpt.com/backend-api',
-    hint: '通常依赖 OpenAI / ChatGPT OAuth 会话，而不是标准 API Key。',
-  },
-  {
-    value: 'github-copilot',
-    label: 'GitHub Copilot',
-    defaultModel: 'claude-sonnet-4',
-    defaultBaseUrl: 'https://api.individual.githubcopilot.com',
-    hint: '通常依赖 GitHub Copilot OAuth，会话型认证多于 API Key。',
-  },
-  {
-    value: 'cerebras',
-    label: 'Cerebras',
-    defaultModel: 'gpt-oss-120b',
-    defaultBaseUrl: 'https://api.cerebras.ai/v1',
-  },
-  {
-    value: 'huggingface',
-    label: 'Hugging Face',
-    defaultModel: 'Qwen/Qwen3-Coder-480B-A35B-Instruct',
-    defaultBaseUrl: 'https://router.huggingface.co/v1',
-  },
-  {
-    value: 'kimi-coding',
-    label: 'Kimi Coding',
-    defaultModel: 'k2p5',
-    defaultBaseUrl: 'https://api.kimi.com/coding',
-  },
-  {
-    value: 'minimax',
-    label: 'MiniMax',
-    defaultModel: 'MiniMax-M2',
-    defaultBaseUrl: 'https://api.minimax.io/anthropic',
-  },
-  {
-    value: 'minimax-cn',
-    label: 'MiniMax CN',
-    defaultModel: 'MiniMax-M2',
-    defaultBaseUrl: 'https://api.minimaxi.com/anthropic',
-  },
-  {
-    value: 'opencode',
-    label: 'OpenCode',
-    defaultModel: 'claude-sonnet-4-5',
-    defaultBaseUrl: 'https://opencode.ai/zen/v1',
-  },
-  {
-    value: 'vercel-ai-gateway',
-    label: 'Vercel AI Gateway',
-    defaultModel: 'alibaba/qwen-3-14b',
-    defaultBaseUrl: 'https://ai-gateway.vercel.sh',
-  },
-  {
-    value: 'zai',
-    label: 'ZAI',
-    defaultModel: 'glm-4.5',
-    defaultBaseUrl: 'https://api.z.ai/api/coding/paas/v4',
+    defaultModel: 'gpt-5.6',
+    hint: '适用于 Ollama、vLLM、LM Studio 或自建网关，Base URL 必须兼容 OpenAI Responses API。',
   },
 ];
 
 const PROVIDER_META_MAP = Object.fromEntries(
   SUPPORTED_PROVIDERS.map((item) => [item.value, item]),
 ) as Record<string, ProviderMeta>;
+
+function normalizeAgentConfig(value: unknown): AgentConfig {
+  const defaults = {
+    apiKey: '',
+    provider: DEFAULT_PROVIDER,
+    model: PROVIDER_META_MAP[DEFAULT_PROVIDER].defaultModel,
+    baseUrl: '',
+    uiStylePrompt: '',
+  };
+
+  if (!value || typeof value !== 'object') return defaults;
+
+  const saved = value as Partial<AgentConfig>;
+  const provider = saved.provider === 'openai-compatible' ? 'openai-compatible' : 'openai';
+  const providerWasSupported = saved.provider === 'openai' || saved.provider === 'openai-compatible';
+  const providerMeta = PROVIDER_META_MAP[provider];
+
+  return {
+    apiKey: typeof saved.apiKey === 'string' ? saved.apiKey : defaults.apiKey,
+    provider,
+    model: providerWasSupported && typeof saved.model === 'string' && saved.model
+      ? saved.model
+      : providerMeta.defaultModel,
+    baseUrl: providerWasSupported && typeof saved.baseUrl === 'string'
+      ? saved.baseUrl
+      : defaults.baseUrl,
+    uiStylePrompt: typeof saved.uiStylePrompt === 'string' ? saved.uiStylePrompt : defaults.uiStylePrompt,
+  };
+}
+
+function buildAgentSystemPrompt(uiStylePrompt: string): string {
+  if (!uiStylePrompt.trim()) return AGENT_SYSTEM_PROMPT;
+
+  return `${AGENT_SYSTEM_PROMPT}
+
+## 用户配置的 UI 页面风格
+
+以下要求只用于控制页面的视觉风格、布局和文案语气。必须在最终工具输出的组件配置中，通过 \`style\` 对象实际实现对应效果，不能只在文字回复中说明。
+\`style\` 使用标准 React 行内 CSS 的驼峰属性，例如 \`backgroundColor\`、\`background\`、\`color\`、\`padding\`、\`border\`、\`borderRadius\`、\`boxShadow\`、\`fontSize\`、\`fontWeight\`、\`lineHeight\`、\`maxWidth\`、\`minHeight\`。不要使用 Tailwind、className、伪类或依赖宿主页面的 CSS。
+优先为根容器和主要区块写背景、留白与尺寸，为表面容器写层级，为标题、正文和按钮写与风格一致的视觉属性。不得改变 SDK Schema、工具调用协议或数据绑定规则。
+
+${uiStylePrompt.trim()}`;
+}
 
 const httpRequest = async (config: HttpRequestConfig) => {
   const response = await axios({
@@ -300,18 +222,15 @@ export default function AgentDemo() {
     const saved = localStorage.getItem('faui-agent-config');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return normalizeAgentConfig(JSON.parse(saved));
       } catch {
         // ignore
       }
     }
-    return {
-      apiKey: '',
-      provider: DEFAULT_PROVIDER,
-      model: PROVIDER_META_MAP[DEFAULT_PROVIDER].defaultModel,
-      baseUrl: '',
-    };
+    return normalizeAgentConfig(null);
   });
+  const [stylePromptModalOpen, setStylePromptModalOpen] = useState(false);
+  const [stylePromptDraft, setStylePromptDraft] = useState('');
 
   useEffect(() => {
     localStorage.setItem('faui-agent-config', JSON.stringify(config));
@@ -330,9 +249,7 @@ export default function AgentDemo() {
   }, [currentConversationId]);
 
   const currentProviderMeta = PROVIDER_META_MAP[config.provider];
-  const providerOptions = currentProviderMeta
-    ? SUPPORTED_PROVIDERS
-    : [{ value: config.provider, label: `${config.provider} (Current)` }, ...SUPPORTED_PROVIDERS];
+  const providerOptions = SUPPORTED_PROVIDERS;
   const apiKeyPlaceholder = currentProviderMeta?.hint?.includes('OAuth')
     ? '该 Provider 往往依赖 OAuth / 环境凭证'
     : config.provider === 'openai-compatible'
@@ -411,6 +328,10 @@ export default function AgentDemo() {
       message.error('请先配置 API Key');
       return;
     }
+    if (config.provider === 'openai-compatible' && !config.baseUrl.trim()) {
+      message.error('OpenAI Compatible 需要填写兼容 Responses API 的 Base URL');
+      return;
+    }
 
     // 如果没有当前对话，创建一个
     let convId = currentConversationId;
@@ -444,16 +365,24 @@ export default function AgentDemo() {
     console.log('历史消息数:', currentMessages.length);
 
     try {
-      const configKey = JSON.stringify({ provider: config.provider, model: config.model, apiKey: config.apiKey, baseUrl: config.baseUrl });
+      const configKey = JSON.stringify({
+        provider: config.provider,
+        model: config.model,
+        apiKey: config.apiKey,
+        baseUrl: config.baseUrl,
+        uiStylePrompt: config.uiStylePrompt,
+      });
       if (!agentRef.current || agentRef.current.configKey !== configKey) {
         agentRef.current = {
           agent: new FauiAgent({
-            provider: config.provider as any,
+            // The local agent accepts the UI's OpenAI Compatible endpoint via
+            // the baseUrl field, while its protocol provider remains "openai".
+            provider: 'openai',
             model: config.model,
             apiKey: config.apiKey,
             baseUrl: config.baseUrl || undefined,
             useTools: true,
-            systemPrompt: AGENT_SYSTEM_PROMPT,
+            systemPrompt: buildAgentSystemPrompt(config.uiStylePrompt),
           }),
           configKey,
         };
@@ -573,10 +502,20 @@ export default function AgentDemo() {
   };
 
   const handleCopyJson = () => {
-    if (currentPageSchema) {
-      navigator.clipboard.writeText(JSON.stringify(currentPageSchema, null, 2));
+    if (currentSchema.length > 0) {
+      navigator.clipboard.writeText(JSON.stringify(currentSchema, null, 2));
       message.success('已复制到剪贴板');
     }
+  };
+
+  const openStylePromptModal = () => {
+    setStylePromptDraft(config.uiStylePrompt);
+    setStylePromptModalOpen(true);
+  };
+
+  const saveStylePrompt = () => {
+    setConfig((prev) => ({ ...prev, uiStylePrompt: stylePromptDraft }));
+    setStylePromptModalOpen(false);
   };
 
   const configPanel = (
@@ -619,7 +558,18 @@ export default function AgentDemo() {
               )}
             </div>
             <div>
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Model</label>
+              <div className="mb-1 flex items-center justify-between">
+                <label className="text-xs text-gray-500 dark:text-gray-400">Model</label>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<SettingOutlined />}
+                  onClick={openStylePromptModal}
+                  aria-label="配置 UI 页面风格提示词"
+                  title="配置 UI 页面风格提示词"
+                  className="!h-5 !w-5 !min-w-0 !p-0 text-gray-500 hover:!text-blue-500"
+                />
+              </div>
               <Input
                 size="small"
                 value={config.model}
@@ -644,6 +594,25 @@ export default function AgentDemo() {
 
   return (
     <div className="flex h-full pt-14">
+      <Modal
+        title="UI 页面风格提示词"
+        open={stylePromptModalOpen}
+        onOk={saveStylePrompt}
+        onCancel={() => setStylePromptModalOpen(false)}
+        okText="保存"
+        cancelText="取消"
+      >
+        <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+          例如：使用极简深色 SaaS 风格，圆角卡片，强调蓝紫渐变和清晰的数据层级。
+        </p>
+        <Input.TextArea
+          value={stylePromptDraft}
+          onChange={(event) => setStylePromptDraft(event.target.value)}
+          placeholder="描述希望生成的 UI 页面风格…"
+          autoSize={{ minRows: 6, maxRows: 14 }}
+        />
+      </Modal>
+
       {/* 左侧对话区 */}
       <div className="w-[38%] min-w-[360px] flex flex-col border-r border-gray-200 dark:border-gray-700">
         {/* 配置面板 */}
@@ -765,8 +734,8 @@ export default function AgentDemo() {
               key: 'json',
               label: (
                 <span className="flex items-center gap-1">
-                  JSON Schema
-                  {currentPageSchema && (
+                  完整 JSON Schema
+                  {currentSchema.length > 0 && (
                     <CopyOutlined
                       className="text-xs hover:text-blue-500 cursor-pointer"
                       onClick={(e) => { e.stopPropagation(); handleCopyJson(); }}
@@ -776,9 +745,9 @@ export default function AgentDemo() {
               ),
               children: (
                 <div className="h-full overflow-auto p-4 bg-gray-50 dark:bg-gray-900">
-                  {currentPageSchema ? (
+                  {currentSchema.length > 0 ? (
                     <pre className="text-xs font-mono bg-white dark:bg-gray-800 rounded-lg p-4 overflow-auto whitespace-pre-wrap break-words">
-                      {JSON.stringify(currentPageSchema, null, 2)}
+                      {JSON.stringify(currentSchema, null, 2)}
                     </pre>
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-sm">

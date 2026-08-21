@@ -10,16 +10,39 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | **必填**，双向绑定的数据路径，值将是一个包含所有文件信息的 `UploadFile[]` 数组 |
-| `accept` | `string` | - | 限制可上传的文件类型（如 `".pdf,image/*"`），支持表达式 |
-| `multiple` | `boolean \| string` | `false` | 是否允许在文件选择框中同时选择多个文件，支持表达式 |
-| `maxCount` | `number \| string` | - | 限制最多允许上传的文件数量，支持表达式 |
-| `listType` | `string` | `'text'` | 上传列表的展示样式，可选 `'text' \| 'picture' \| 'picture-card'`，支持表达式 |
-| `showUploadList` | `boolean \| string` | `true` | 是否展示已上传或正在上传的文件列表，支持表达式 |
-| `label` | `string` | `'点击上传'` | 默认上传按钮上的文字，支持表达式 |
-| `children` | `string[]` | - | 用于替换默认上传按钮的自定义子组件 ID |
+<!-- contract-props:start -->
+## Form 契约属性（upload）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `accept` |  | 静态值 |  |  |
+| `multiple` |  | 静态值 |  |  |
+| `maxCount` |  | 静态值 |  |  |
+| `listType` |  | 静态值 |  |  |
+| `showUploadList` |  | 静态值 |  |  |
+| `label` |  | `expression` |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`button-trigger`
+- 事件：`on_change`
+- dataModel 绑定：`value`（array | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### accept（文件类型限制）
 
@@ -93,7 +116,7 @@
 1. **自动回写**：只要配置了 `value.path`，组件在文件状态发生变化（选择、上传中、完成、删除）时，会自动执行 `update_data` 将最新的文件列表数组（`UploadFile[]`）写回全局状态，并触发所在表单的校验。
 2. **自定义回调**：如果你配置了 `on_change`，引擎会优先执行你定义的动作流。此时，**你必须在动作流中自行配置 `update_data`** 以保证状态同步。可通过 `${$value}` 引用最新的文件列表。如果 on_change 中未设置 `value` 字段，组件会自动注入当前文件列表；如果设置了自定义 `value` 表达式，组件会保留你的表达式不覆盖。
 
-**特殊插值规则**：在 `upload` 组件的 `on_change` 动作流中，你可以使用 `${fileList}` 来代表当前组件最新的文件列表数组对象。
+事件动作统一使用 `${$value}` 表示当前组件最新的文件列表数组对象，不再使用 `${fileList}` 特例。
 
 ```json
 {
@@ -108,10 +131,8 @@
     ],
     "on_change": {
       "action": "update_data",
-      "payload": {
-        "path": "/form/attachments",
-        "value": "${fileList}"
-      }
+      "path": "/form/attachments",
+      "value": "${$value}"
     }
   }
 }
@@ -225,5 +246,5 @@
   }
   ```
 
-**Q: `value.path` 和 `on_change` 的 `${fileList}` 是什么格式？**
+**Q: `value.path` 和 `on_change` 的 `${$value}` 是什么格式？**
 - 它是 Ant Design 内部维护的文件对象数组。每个元素包含 `uid` (唯一标识)、`name` (文件名)、`status` (上传状态)、`size` (大小) 以及原始文件对象 `originFileObj` 等字段。

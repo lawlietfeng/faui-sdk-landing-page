@@ -21,10 +21,29 @@
 
 ### 1. layout（主容器）
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `children` | `string[]` | `[]` | 子组件的 ID 数组，通常放置 `header`, `sider`, `content`, `footer` 或子 `layout`。 |
-| `hasSider` | `boolean` | - | 标明子元素里是否包含 `sider`。如果未设置，组件会自动推断。若出现渲染闪烁可手动设为 `true`。 |
+<!-- contract-props:start -->
+## Form 契约属性（layout）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `hasSider` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ```json
 {

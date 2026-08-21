@@ -10,16 +10,37 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `title` | `string` | `'确定要执行此操作吗？'` | 确认框的主标题，支持插值表达式 |
-| `description` | `string` | - | 确认框的详细描述，支持插值表达式 |
-| `okText` | `string` | - | 确认按钮的文字 |
-| `cancelText` | `string` | - | 取消按钮的文字 |
-| `okType` | `'default' \| 'primary' \| 'dashed' \| 'link' \| 'text'` | - | 确认按钮的类型风格 |
-| `placement` | `string` | - | 气泡框相对于触发元素的弹出位置 |
-| `disabled` | `boolean \| string` | `false` | 是否禁用气泡确认框（禁用时点击直接触发子元素事件，不弹出气泡） |
-| `children` | `string[]` | - | 必须配置子节点（通常为 `button` 等组件 ID），作为触发气泡的锚点 |
+<!-- contract-props:start -->
+## Form 契约属性（popconfirm）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `title` |  | `expression` | 组件显示的文本内容。 |  |
+| `description` |  | `expression` | 组件显示的文本内容。 |  |
+| `okText` |  | 静态值 |  |  |
+| `cancelText` |  | 静态值 |  |  |
+| `okType` |  | 静态值 |  |  |
+| `placement` |  | 静态值 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `on_confirm` |  | 静态值 |  |  |
+| `on_cancel` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`trigger-component-ids`
+- 事件：`on_confirm`, `on_cancel`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### title & description（标题与描述）
 

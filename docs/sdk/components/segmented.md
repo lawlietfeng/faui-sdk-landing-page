@@ -10,15 +10,36 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value` | `ValueBinding` | - | 双向绑定的数据路径，用于回显和写入当前选中的值 |
-| `options` | `Array \| string` | - | 分段控制器选项数据，支持插值表达式 |
-| `block` | `boolean \| string` | `false` | 是否将宽度调整为父元素宽度的 100%，支持插值表达式 |
-| `disabled` | `boolean \| string` | `false` | 是否禁用整个分段控制器，支持插值表达式 |
-| `size` | `'large' \| 'middle' \| 'small' \| string` | `'middle'` | 控件大小，支持插值表达式 |
-| `on_change` | `ActionConfig` | - | 选中项变化时的自定义回调动作。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `rules` | `FormRule[]` | - | 表单校验规则 |
+<!-- contract-props:start -->
+## Form 契约属性（segmented）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `options` |  | `expression` |  |  |
+| `block` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `size` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | number | boolean | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### options（选项列表）
 
@@ -115,12 +136,12 @@
     {
       "action": "update_data",
       "path": "/view/mode",
-      "value": "${value}"
+      "value": "${$value}"
     },
     {
       "action": "console_log",
       "payload": {
-        "content": "用户切换了视图模式为：${value}"
+        "content": "用户切换了视图模式为：${$value}"
       }
     }
   ]

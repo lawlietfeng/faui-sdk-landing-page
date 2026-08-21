@@ -1,0 +1,66 @@
+{
+  "listed": [
+    { "key": "sdk/development", "label": "开发者指南", "section": "guides-and-reference" },
+    { "key": "sdk/npm-usage", "label": "SDK 使用指南", "section": "guides-and-reference" },
+    { "key": "sdk/form-guide", "label": "Form 表单指南", "section": "guides-and-reference" },
+    { "key": "sdk/external-submit", "label": "外部校验与提交", "section": "guides-and-reference" },
+    { "key": "site/http-request", "label": "HTTP 请求与后端中转", "section": "guides-and-reference" },
+    { "key": "site/lifecycle", "label": "组件与 Action 生命周期", "section": "guides-and-reference" },
+    { "key": "sdk/lifecycle-types", "label": "Activity 与 JSON Patch", "section": "guides-and-reference" },
+    { "key": "sdk/animation", "label": "Animation", "section": "guides-and-reference" },
+    { "key": "sdk/component-doc-standard", "label": "组件文档规范", "section": "guides-and-reference" },
+    { "key": "sdk/form-dynamic-bindings", "label": "Form 动态绑定规范", "section": "guides-and-reference" },
+    { "key": "sdk/actions/update_data", "label": "update_data", "section": "actions" },
+    { "key": "sdk/actions/http_proxy", "label": "http_proxy", "section": "actions" },
+    { "key": "sdk/actions/message", "label": "message", "section": "actions" },
+    { "key": "sdk/actions/notification", "label": "notification", "section": "actions" }
+  ],
+  "hidden": [
+    "sdk/faui-llm-prompt",
+    "sdk/actions/README",
+    "sdk/actions/copy",
+    "sdk/actions/mcp_tool_call",
+    "sdk/actions/send_prompt",
+    "sdk/actions/input_prompt",
+    "sdk/form-edition-dynamic-properties-plan",
+    "sdk/form-edition-migration"
+  ],
+  "componentCategories": [
+    {
+      "key": "layout-navigation",
+      "label": "布局与导航",
+      "children": ["box", "divider", "flex", "grid", "layout", "space"]
+    },
+    {
+      "key": "data-display",
+      "label": "数据展示",
+      "children": ["calendar", "icon", "progress", "skeleton", "tag", "text", "typography"]
+    },
+    {
+      "key": "form-data-entry",
+      "label": "表单与数据录入",
+      "children": [
+        "autocomplete", "button", "cascader", "checkbox", "colorpicker",
+        "datepicker", "form", "input", "inputnumber", "mentions", "radio", "rate",
+        "segmented", "select", "slider", "switch", "textarea", "timepicker",
+        "transfer", "treeselect", "upload"
+      ]
+    },
+    {
+      "key": "feedback",
+      "label": "弹层与反馈",
+      "children": ["alert", "drawer", "modal", "popconfirm", "popover", "spin", "tooltip"]
+    },
+    {
+      "key": "logic-control-flow",
+      "label": "逻辑与控制流",
+      "children": ["condition", "repeater"]
+    }
+  ],
+  "fullComponentSlugs": [
+    "affix", "anchor", "avatar", "badge", "card", "carousel", "chart", "collapse",
+    "descriptions", "dropdown", "empty", "floatbutton", "image", "list", "menu",
+    "pagination", "qrcode", "statistic", "stepindicator", "steps", "table", "tabs",
+    "timeline", "tour", "tree", "watermark"
+  ]
+}

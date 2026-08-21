@@ -10,17 +10,42 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `open` | `boolean \| ValueBinding` | `false` | 抽屉是否可见，强烈推荐使用数据绑定对象（`{"path": "..."}`） |
-| `title` | `string` | - | 抽屉标题文字，支持表达式插值 |
-| `placement` | `string` | `right` | 抽屉滑出的位置，可选 `top`、`right`、`bottom`、`left` |
-| `width` | `number \| string` | `378` | 抽屉宽度，在 `placement` 为 `right` 或 `left` 时生效 |
-| `height` | `number \| string` | `378` | 抽屉高度，在 `placement` 为 `top` 或 `bottom` 时生效 |
-| `on_close` | `ActionConfig[]` | - | 点击遮罩层或右上角关闭按钮时的回调动作 |
-| `mask` | `boolean` | `true` | 是否展示背景遮罩 |
-| `maskClosable` | `boolean` | `true` | 点击背景遮罩时是否允许关闭 |
-| `destroyOnHidden` | `boolean` | `false` | 隐藏时是否销毁内部子元素（等同于 Ant Design 的 destroyOnClose） |
+<!-- contract-props:start -->
+## Form 契约属性（drawer）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `open` |  | `boolean`, `path`, 路径：`root-or-repeater-relative` |  |  |
+| `title` |  | 静态值 |  |  |
+| `placement` |  | 静态值 |  |  |
+| `width` |  | 静态值 |  |  |
+| `height` |  | 静态值 |  |  |
+| `closable` |  | 静态值 |  |  |
+| `destroyOnHidden` |  | 静态值 |  |  |
+| `keyboard` |  | 静态值 |  |  |
+| `mask` |  | 静态值 |  |  |
+| `maskClosable` |  | 静态值 |  |  |
+| `zIndex` |  | 静态值 |  |  |
+| `extra` |  | 静态值 |  |  |
+| `footer` |  | 静态值 |  |  |
+| `on_close` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：`on_close`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### open（可见状态绑定）
 

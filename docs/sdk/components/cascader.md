@@ -12,14 +12,34 @@
 
 ### 属性总览
 
-| 属性名        | 类型                                                        | 默认值 | 说明                                                         |
-| ------------- | ----------------------------------------------------------- | ------ | ------------------------------------------------------------ |
-| `value.path`  | `string`                                                    | -      | 双向绑定的数据路径，值类型通常为选中节点的值数组（如 `["zhejiang", "hangzhou"]`）。 |
-| `options`     | `Array` (支持表达式)                                        | -      | 可选项数据源。包含 `value`, `label`, `children`。            |
-| `placeholder` | `string` (支持表达式)                                       | -      | 输入框占位文本。                                             |
-| `field`       | `string`                                                    | -      | 表单字段名。未配置时将退化使用 `value.path` 的尾部或 `id`。  |
-| `rules`       | `FormRule[]`                                                | -      | 表单校验规则（如必填项）。                                   |
-| `on_change`   | `Action`                                                    | -      | 选中项变化时的回调。默认会自动回写到 `value.path`。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
+<!-- contract-props:start -->
+## Form 契约属性（cascader）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `options` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（array | string | number | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 
@@ -39,7 +59,7 @@
 
 ### options（数据源）
 
-级联的数据源结构，支持通过 `useExpression` 从全局状态动态获取（如 `${data.cityTree}`）。如果静态配置，需满足树形结构：
+级联的数据源结构，支持通过 `useExpression` 从全局状态动态获取（如 `${$root.cityTree}`）。如果静态配置，需满足树形结构：
 
 | 字段       | 类型     | 说明                         |
 | ---------- | -------- | ---------------------------- |
@@ -102,7 +122,7 @@
   "value": {
     "path": "/form/areaCode"
   },
-  "options": "${data.areaTree}",
+  "options": "${$root.areaTree}",
   "rules": [
     { "required": true, "message": "此项必填" }
   ],
@@ -110,7 +130,7 @@
     "action": "message",
     "payload": {
       "type": "info",
-      "content": "您选中的路径是：${value}"
+      "content": "您选中的路径是：${$value}"
     }
   }
 }
@@ -122,4 +142,4 @@
 - 检查你的 `options` 数组，每个对象都必须有 `value` 和 `label`。如果最底层节点依然包含空的 `children: []`，组件可能会认为它还没加载完子节点。请确保叶子节点不要有 `children` 属性。
 
 **Q: 如何获取选中项的 label 文字？**
-- 目前组件的 `onChange` 默认绑定的 `${value}` 是 `value` 字段组成的数组（如 `["zhejiang", "hangzhou"]`）。如果需要转换成中文名称，建议在外部通过 `evaluateExpression` 结合原数据源进行匹配映射，或者在后续的后端请求中解析。
+- 目前组件的 `onChange` 默认绑定的 `${$value}` 是 `value` 字段组成的数组（如 `["zhejiang", "hangzhou"]`）。如果需要转换成中文名称，建议在外部通过 `evaluateExpression` 结合原数据源进行匹配映射，或者在后续的后端请求中解析。

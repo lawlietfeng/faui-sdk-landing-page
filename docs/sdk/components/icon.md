@@ -10,12 +10,30 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `icon` | `string` | - | 图标的官方组件名称，如 `HomeOutlined`、`SettingFilled` |
-| `value` | `ValueBinding` | - | 通过双向绑定动态控制要显示的图标名称 |
-| `spin` | `boolean` | `false` | 是否开启一直旋转的动画效果 |
-| `rotate` | `number` | - | 静态图标的旋转角度（单位：度） |
+<!-- contract-props:start -->
+## Form 契约属性（icon）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `icon` |  | `expression` |  |  |
+| `spin` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `rotate` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### icon（图标名称）
 

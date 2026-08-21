@@ -57,7 +57,7 @@ const schema: ActivitySnapshot[] = [
           component: 'input',
           placeholder: '请输入姓名',
           value: { path: '/name' },
-          on_change: { action: 'update_data', path: '/name', value: '${value}' },
+          on_change: { action: 'update_data', path: '/name', value: '${$value}' },
         },
         {
           id: 'submit-btn',

@@ -10,15 +10,44 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `open.path` | `string` | - | 双向绑定的弹窗显示状态路径，值必须为 `boolean`。 |
-| `title` | `string` | - | 弹窗标题文字，支持表达式。 |
-| `children` | `string[]` | `[]` | 弹窗内部的内容组件 ID 列表。 |
-| `width` | `string` \| `number` | `520` | 弹窗宽度，如 `"80%"` 或 `800`。 |
-| `footer` | `boolean` \| `null` | - | 是否显示底部区域。设为 `false` 或 `null` 可隐藏底部的确认/取消按钮。 |
-| `on_ok` | `ActionConfig` | - | 点击“确定”按钮的回调动作。 |
-| `on_cancel` | `ActionConfig` | - | 点击“取消”按钮、右上角叉或遮罩层的回调动作。 |
+<!-- contract-props:start -->
+## Form 契约属性（modal）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `open` |  | `boolean`, `path`, 路径：`root-or-repeater-relative` |  |  |
+| `title` |  | 静态值 |  |  |
+| `cancelText` |  | 静态值 |  |  |
+| `okText` |  | 静态值 |  |  |
+| `okType` |  | 静态值 |  |  |
+| `footer` |  | 静态值 |  |  |
+| `width` |  | 静态值 |  |  |
+| `centered` |  | 静态值 |  |  |
+| `closable` |  | 静态值 |  |  |
+| `destroyOnHidden` |  | 静态值 |  |  |
+| `keyboard` |  | 静态值 |  |  |
+| `mask` |  | 静态值 |  |  |
+| `maskClosable` |  | 静态值 |  |  |
+| `zIndex` |  | 静态值 |  |  |
+| `on_ok` |  | 静态值 |  |  |
+| `on_cancel` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：`on_ok`, `on_cancel`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### open.path（弹窗显隐控制）
 

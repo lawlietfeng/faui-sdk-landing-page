@@ -12,13 +12,36 @@
 
 ### 属性总览
 
-| 属性名        | 类型                                                                 | 默认值 | 说明                               |
-| ------------- | -------------------------------------------------------------------- | ------ | ---------------------------------- |
-| `title`       | `string` (支持表达式)                                                | -      | 警告提示的主标题。                   |
-| `content`     | `string` (支持表达式)                                                | -      | 同 `title`，主提示内容的别名。       |
-| `description` | `string` (支持表达式)                                                | -      | 辅助性说明文字，显示在标题下方。     |
-| `status`      | `'success' \| 'info' \| 'warning' \| 'error' \| 'active' \| 'exception' \| 'normal'` | `'info'` | 警告提示的样式状态类型。             |
-| `showIcon`    | `boolean`                                                            | `true` | 是否显示与 `status` 对应的辅助图标。 |
+<!-- contract-props:start -->
+## Form 契约属性（alert）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `title` |  | `expression` | 组件显示的文本内容。 |  |
+| `content` |  | `expression` | 组件显示的文本内容。 |  |
+| `message` |  | 静态值 | （已弃用：title） |  |
+| `description` |  | `expression` | 组件显示的文本内容。 |  |
+| `showIcon` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `status` |  | 静态值 |  |  |
+| `type` |  | 静态值 |  |  |
+| `closable` |  | 静态值 |  |  |
+| `on_close` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 

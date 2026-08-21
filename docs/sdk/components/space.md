@@ -10,14 +10,33 @@
 
 ## 核心属性
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| direction | `string` | `"horizontal"` | 间距方向，支持 `"horizontal" \| "vertical"`（支持 `useExpression` 插值） |
-| size | `string \| number \| [number, number]` | `"small"` | 间距大小（支持 `useExpression` 插值） |
-| align | `string` | - | 交叉轴对齐方式（支持 `useExpression` 插值） |
-| wrap | `boolean \| string` | `false` | 是否自动换行，仅在水平方向有效（支持 `useExpression` 插值） |
-| split | `string` | - | 设置分隔符，目前仅支持 `"divider"`（支持 `useExpression` 插值） |
-| children | `string[]` | `[]` | 子组件 ID 列表 |
+<!-- contract-props:start -->
+## Form 契约属性（space）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `direction` |  | 静态值 |  |  |
+| `size` |  | 静态值 |  |  |
+| `align` |  | 静态值 |  |  |
+| `split` |  | 静态值 |  |  |
+| `wrap` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### direction（排列方向）
 

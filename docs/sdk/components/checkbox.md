@@ -11,19 +11,40 @@
 
 ### 属性总览
 
-| 属性名         | 类型                                                        | 默认值  | 说明                                                              |
-| -------------- | ----------------------------------------------------------- | ------- | ----------------------------------------------------------------- |
-| `value.path`   | `string`                                                    | -       | 双向绑定的数据路径。单选时值为布尔值，多选组时值为字符串/数字数组。 |
-| `checked.path` | `string`                                                    | -       | 同 `value.path`，向后兼容的别名属性。                             |
-| `label`        | `string` (支持表达式)                                       | -       | 单个 checkbox 的展示文本（仅在单选模式生效）。                      |
-| `options`      | `Array` (支持表达式)                                        | -       | 决定是否为多选组。包含 `label` 和 `value` 的数组。                  |
-| `field`        | `string`                                                    | -       | 表单字段名。                                                      |
-| `rules`        | `FormRule[]`                                                | -       | 表单校验规则（如必选）。                                          |
-| `on_change`    | `Action`                                                    | -       | 选中状态改变时的回调。默认会自动回写。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
+<!-- contract-props:start -->
+## Form 契约属性（checkbox）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `options` |  | `expression` |  |  |
+| `label` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `checked` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` | （已弃用：checked） |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`checked`（boolean | array）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 
-### value.path / checked.path（数据绑定）
+### checked.path（数据绑定）
 
 绑定勾选状态。这里有两种模式：
 1. **单一模式**（不传 `options`）：绑定的值为 `boolean` (`true` / `false`)。
@@ -34,7 +55,7 @@
   "id": "agree_checkbox",
   "component": "checkbox",
   "label": "我已阅读并同意用户协议",
-  "value": {
+  "checked": {
     "path": "/form/isAgreed"
   }
 }
@@ -58,12 +79,12 @@
     { "label": "运动", "value": "sports" },
     { "label": "音乐", "value": "music" }
   ],
-  "value": {
+  "checked": {
     "path": "/form/hobbies"
   }
 }
 ```
-*提示：也可以写为 `"options": "${data.hobbiesDict}"`*
+*提示：也可以写为 `"options": "${$root.hobbiesDict}"`*
 
 ### rules（表单校验）
 
@@ -88,8 +109,8 @@
 {
   "id": "skills_selector",
   "component": "checkbox",
-  "options": "${data.skillList}",
-  "value": {
+  "options": "${$root.skillList}",
+  "checked": {
     "path": "/userProfile/skills"
   },
   "rules": [
@@ -99,7 +120,7 @@
     "action": "message",
     "payload": {
       "type": "success",
-      "content": "当前选中的技能是：${value}"
+      "content": "当前选中的技能是：${$value}"
     }
   }
 }
@@ -108,10 +129,10 @@
 ## 新手常见问题
 
 **Q: 为什么我勾选了一个 checkbox，其他 checkbox 也被勾选了？**
-- 在单选模式下，如果你在页面中放置了多个独立的 `checkbox`，并且它们绑定了同一个 `value.path`，那么它们的状态会同步。如果你希望做多选，请使用单个 `checkbox` 组件并传入 `options` 数组，而不是写多个组件。
+- 在单选模式下，如果你在页面中放置了多个独立的 `checkbox`，并且它们绑定了同一个 `checked.path`，那么它们的状态会同步。如果你希望做多选，请使用单个 `checkbox` 组件并传入 `options` 数组，而不是写多个组件。
 
 **Q: 动态获取的 options 为什么不渲染？**
-- 检查你绑定的表达式 `${data.xxx}` 在状态树中是否存在，并且确保它是一个包含 `label` 和 `value` 的标准数组格式。
+- 检查你绑定的表达式 `${$root.xxx}` 在状态树中是否存在，并且确保它是一个包含 `label` 和 `value` 的标准数组格式。
 
 **Q: checked.path 和 value.path 有什么区别？**
-- 在 FAUI 的底层实现中，这两个属性是等价的，为了兼容不同开发者的习惯。当两者都存在时，优先取 `checked.path`。建议统一使用 `value.path`。
+- `checked.path` 是 Checkbox 的规范绑定属性。当两者都存在时优先取 `checked.path`；历史 `value.path` 仍兼容但已弃用。

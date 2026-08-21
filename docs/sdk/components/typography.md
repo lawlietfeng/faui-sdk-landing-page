@@ -10,17 +10,45 @@
 
 ## 核心属性
 
-| 属性名          | 类型                            | 默认值      | 说明                                                                   |
-| ------------ | ----------------------------- | -------- | -------------------------------------------------------------------- |
-| `variant`    | `string`                      | `'text'` | 排版变体，可选 `'text' \| 'title' \| 'paragraph' \| 'link'`                 |
-| `content`    | `string`                      | -        | 静态文本内容，支持插值表达式。如果有 `children` 或 `items` 则优先渲染子节点                     |
-| `value.path` | `string`                      | -        | 绑定全局数据的路径，优先级高于 `content`                                            |
-| `textType`   | `string`                      | -        | 文本的主题状态，可选 `'secondary' \| 'success' \| 'warning' \| 'danger'`，支持表达式 |
-| `level`      | `number \| string`            | -        | 仅当 `variant="title"` 时生效，指定标题级别 (1-5)，支持表达式                          |
-| `copyable`   | `boolean \| object \| string` | `false`  | 是否开启一键复制功能，支持表达式                                                     |
-| `ellipsis`   | `boolean \| object \| string` | `false`  | 自动溢出省略，支持表达式                                                         |
-| `href`       | `string`                      | -        | 仅当 `variant="link"` 时生效，跳转的链接地址，支持表达式                                |
-| `target`     | `string`                      | -        | 仅当 `variant="link"` 时生效，链接打开方式，如 `"_blank"`，支持表达式                    |
+<!-- contract-props:start -->
+## Form 契约属性（typography）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `variant` |  | 静态值 |  |  |
+| `textType` |  | 静态值 |  |  |
+| `type` |  | 静态值 |  |  |
+| `level` |  | 静态值 |  |  |
+| `disabled` |  | 静态值 |  |  |
+| `mark` |  | 静态值 |  |  |
+| `code` |  | 静态值 |  |  |
+| `keyboard` |  | 静态值 |  |  |
+| `underline` |  | 静态值 |  |  |
+| `delete` |  | 静态值 |  |  |
+| `strong` |  | 静态值 |  |  |
+| `italic` |  | 静态值 |  |  |
+| `ellipsis` |  | 静态值 |  |  |
+| `copyable` |  | 静态值 |  |  |
+| `href` |  | 静态值 |  |  |
+| `target` |  | 静态值 |  |  |
+| `items` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### variant 与 level（排版类型）
 

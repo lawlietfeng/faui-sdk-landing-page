@@ -12,14 +12,36 @@ calendar 组件用于展示日历面板，允许用户通过点击选择具体�
 
 ### 属性总览
 
-| 属性名            | 类型                            | 默认值         | 说明                                           |
-| ----------------- | ------------------------------- | -------------- | ---------------------------------------------- |
-| `value.path`      | `string`                        | -              | 双向绑定的数据路径（如 `/selectedDate`）。       |
-| `format`          | `string`                        | `'YYYY-MM-DD'` | 选中日期后存入数据的格式，兼容 dayjs 格式字符串。|
-| `fullscreen`      | `boolean \| string` (支持表达式)| `true`         | 是否为全屏日历。`false` 时显示为卡片模式日历。 |
-| `mode`            | `'month' \| 'year' \| string`   | `'month'`      | 初始显示的面板模式（月视图或年视图）。         |
-| `on_change`       | `Action`                        | -              | 选中日期时触发的动作。默认回写 `value.path`。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `on_panel_change` | `Action`                        | -              | 切换面板（年月切换）时触发的动作。             |
+<!-- contract-props:start -->
+## Form 契约属性（calendar）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `fullscreen` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `mode` |  | 静态值 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `format` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`, `on_panel_change`
+- dataModel 绑定：`value`（string | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 
@@ -92,7 +114,7 @@ calendar 组件用于展示日历面板，允许用户通过点击选择具体�
 
 ### 2. 自定义事件响应 (on_change & on_panel_change)
 
-如果你配置了 `on_change` 动作，默认的 `value.path` 回写将被拦截覆盖（除非你的 Action 是 `update_data`）。此时选中的日期字符串会被注入到动作的 `${value}` 变量中，选择来源会注入到 `${payload.source}`。
+如果你配置了 `on_change` 动作，默认的 `value.path` 回写将被拦截覆盖（除非你的 Action 是 `update_data`）。此时选中的日期字符串会被注入到动作的 `${$value}` 变量中，选择来源会注入到 `${payload.source}`。
 
 当用户通过头部控件切换年月时，会触发 `on_panel_change`。面板的最新模式会注入到 `${payload.mode}` 中。
 
@@ -108,7 +130,7 @@ calendar 组件用于展示日历面板，允许用户通过点击选择具体�
         "path": "/api/events"
       },
       "http_body": {
-        "date": "${value}"
+        "date": "${$value}"
       }
     }
   }
@@ -132,7 +154,7 @@ calendar 组件用于展示日历面板，允许用户通过点击选择具体�
     "action": "message",
     "payload": {
       "type": "info",
-      "content": "你选择了：${value}"
+      "content": "你选择了：${$value}"
     }
   },
   "style": {

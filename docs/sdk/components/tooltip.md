@@ -10,14 +10,35 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `title` | `string` | - | **必填**，提示框内展示的文字内容，支持插值表达式 |
-| `placement` | `string` | `'top'` | 气泡框弹出的位置，支持表达式 |
-| `trigger` | `string \| string[]` | `'hover'` | 触发气泡框显示的行为，支持表达式 |
-| `open` | `boolean \| string \| ValueBinding` | - | 控制气泡框是否可见，支持双向绑定或表达式 |
-| `arrow` | `boolean \| string` | `true` | 是否显示指向目标元素的箭头，支持表达式 |
-| `color` | `string` | - | 气泡框的背景颜色，支持主题色名（如 `blue`）或具体的色值 |
+<!-- contract-props:start -->
+## Form 契约属性（tooltip）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `title` |  | `expression` | 组件显示的文本内容。 |  |
+| `placement` |  | 静态值 |  |  |
+| `trigger` |  | 静态值 |  |  |
+| `open` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `on_open_change` |  | 静态值 |  |  |
+| `arrow` |  | 静态值 |  |  |
+| `color` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`trigger-component-ids`
+- 事件：`on_open_change`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### placement（弹出位置）
 
@@ -86,7 +107,7 @@
 你可以通过 `open` 属性将气泡框的显示状态绑定到全局数据中，引擎提供了完善的 fallback 回写机制。
 
 1. **自动回写**：只要配置了 `open: { "path": "/isOpen" }`，当气泡显示/隐藏时，引擎会自动执行 `update_data` 将布尔值写回该路径。
-2. **自定义动作**：如果你配置了 `on_open_change`，引擎将执行你的自定义动作流。在动作流中，你可以通过 `${value}` 获取最新的布尔状态。
+2. **自定义动作**：如果你配置了 `on_open_change`，引擎将执行你的自定义动作流。在动作流中，你可以通过 `${$value}` 获取最新的布尔状态。
 
 ```json
 {

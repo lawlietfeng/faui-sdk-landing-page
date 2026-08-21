@@ -12,19 +12,40 @@ button 组件用于响应用户的点击操作，触发业务逻辑（如提交�
 
 ### 属性总览
 
-| 属性名     | 类型                         | 默认值      | 说明                                             |
-| ---------- | ---------------------------- | ----------- | ------------------------------------------------ |
-| `label`    | `string` (支持表达式)        | -           | 按钮文本（推荐）。                               |
-| `content`  | `string` (支持表达式)        | -           | 同 `label`，按钮文本的另一种写法。               |
-| `type`     | `'primary' \| 'dashed' \| 'link' \| 'text' \| 'default'` | `'default'` | 按钮的视觉类型。                                 |
-| `danger`   | `boolean`                    | `false`     | 是否为危险按钮（通常为红色）。                   |
-| `ghost`    | `boolean`                    | `false`     | 幽灵属性，使按钮背景透明。                       |
-| `shape`    | `'default' \| 'circle' \| 'round'` | `'default'` | 按钮的形状。                                     |
-| `size`     | `'large' \| 'middle' \| 'small'` | `'middle'`  | 按钮的尺寸。                                     |
-| `block`    | `boolean`                    | `false`     | 将按钮宽度调整为其父宽度的 100%。                |
-| `disabled` | `boolean` (支持表达式)       | `false`     | 是否禁用按钮。                                   |
-| `on_tap`   | `Action[]`                   | -           | 点击按钮时触发的动作数组。                       |
-| `children` | `string[]`                   | -           | 嵌套子组件（仅在未设置 `label/content` 时生效）。|
+<!-- contract-props:start -->
+## Form 契约属性（button）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `label` |  | `expression` |  |  |
+| `title` |  | 静态值 |  |  |
+| `color` |  | 静态值 |  |  |
+| `content` |  | `expression` | 组件显示的文本内容。 |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `type` |  | 静态值 |  |  |
+| `danger` |  | 静态值 |  |  |
+| `ghost` |  | 静态值 |  |  |
+| `shape` |  | 静态值 |  |  |
+| `size` |  | 静态值 |  |  |
+| `block` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `on_tap` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`component-ids`
+- 事件：`on_tap`
+- dataModel 绑定：无
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ---
 
@@ -39,7 +60,7 @@ button 组件用于响应用户的点击操作，触发业务逻辑（如提交�
   "label": "提交"
 }
 ```
-*提示：也可以使用插值表达式如 `"label": "提交 ${data.formName}"`。*
+*提示：也可以使用插值表达式如 `"label": "提交 ${$root.formName}"`。*
 
 ### type（按钮类型）
 
@@ -155,7 +176,7 @@ button 组件用于响应用户的点击操作，触发业务逻辑（如提交�
   "type": "primary",
   "danger": true,
   "size": "large",
-  "label": "确认删除 ${data.itemName}",
+  "label": "确认删除 ${$root.itemName}",
   "on_tap": [
     {
       "action": "http_proxy",

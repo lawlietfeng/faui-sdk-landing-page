@@ -51,7 +51,7 @@
   "id": "name-input",
   "component": "input",
   "value": { "path": "/name" },
-  "on_change": { "action": "update_data", "path": "/name", "value": "${value}" } // 👈 这一坨现在完全不需要写了！
+  "on_change": { "action": "update_data", "path": "/name", "value": "${$value}" } // 👈 这一坨现在完全不需要写了！
 }
 ```
 

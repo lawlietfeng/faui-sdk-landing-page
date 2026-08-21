@@ -42,6 +42,18 @@
 }
 ```
 
+### disabled（禁用）
+
+支持布尔值、表达式或数据绑定；禁用后不可更改当前选择。
+
+```json
+{
+  "id": "type-select",
+  "component": "select",
+  "disabled": { "path": "/form/locked" }
+}
+```
+
 ### value.path（数据绑定）
 
 将选中值绑定到 `dataModel`：
@@ -98,6 +110,39 @@
 }
 ```
 
+<!-- contract-props:start -->
+## Form 契约属性（select）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `placeholder` |  | `expression` |  |  |
+| `options` |  | `expression` |  |  |
+| `mode` |  | 静态值 |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `allowClear` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `showSearch` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `maxTagCount` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | number | boolean | array | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 ## 完整示例
 
 ### 基础选择框
@@ -113,7 +158,7 @@
     { "label": "紧急申请", "value": "urgent" }
   ],
   "rules": [{ "required": true, "message": "请选择申请类型" }],
-  "on_change": { "action": "update_data", "path": "/requestType", "value": "${value}" }
+  "on_change": { "action": "update_data", "path": "/requestType", "value": "${$value}" }
 }
 ```
 
@@ -132,7 +177,7 @@
     { "label": "市场部", "value": "MARKET" }
   ],
   "rules": [{ "required": true, "message": "请选择部门" }],
-  "on_change": { "action": "update_data", "path": "/department", "value": "${value}" }
+  "on_change": { "action": "update_data", "path": "/department", "value": "${$value}" }
 }
 ```
 
@@ -166,7 +211,7 @@
     "placeholder": "请输入标题",
     "value": { "path": "/title" },
     "rules": [{ "required": true, "message": "请输入标题" }],
-    "on_change": { "action": "update_data", "path": "/title", "value": "${value}" }
+    "on_change": { "action": "update_data", "path": "/title", "value": "${$value}" }
   },
   {
     "id": "type-select",
@@ -179,7 +224,7 @@
       { "label": "建议", "value": "suggestion" }
     ],
     "rules": [{ "required": true, "message": "请选择类型" }],
-    "on_change": { "action": "update_data", "path": "/type", "value": "${value}" }
+    "on_change": { "action": "update_data", "path": "/type", "value": "${$value}" }
   },
   {
     "id": "submit-btn",

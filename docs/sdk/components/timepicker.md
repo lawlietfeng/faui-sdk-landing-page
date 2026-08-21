@@ -17,15 +17,38 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | **必填**，双向绑定的数据路径，选中的时间会以字符串格式写回该路径 |
-| `format` | `string` | `"HH:mm:ss"` | 控制显示和提交的时间字符串格式 |
-| `placeholder` | `string` | - | 未选择时的占位提示文本，支持表达式 |
-| `disabled` | `boolean \| string` | `false` | 是否禁用时间选择器，支持表达式 |
-| `hourStep` | `number \| string` | `1` | 小时选项的间隔步长，支持表达式 |
-| `minuteStep` | `number \| string` | `1` | 分钟选项的间隔步长，支持表达式 |
-| `secondStep` | `number \| string` | `1` | 秒钟选项的间隔步长，支持表达式 |
+<!-- contract-props:start -->
+## Form 契约属性（timepicker）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `format` |  | 静态值 |  |  |
+| `placeholder` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `minuteStep` |  | 静态值 |  |  |
+| `secondStep` |  | 静态值 |  |  |
+| `hourStep` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### format（时间格式）
 
@@ -172,7 +195,7 @@
 **Q: 如何限制用户只能选择未来时间或者特定工作时段？**
 - 目前 FAUI 的 `timepicker` 暂未暴露 `disabledHours` 等复杂的时间禁用属性。建议：
   1. 通过表单的自定义 `rules` (使用正则表达式或联动校验) 在提交时拦截。
-  2. 如果必须在交互上限制，可以在 `on_change` 的后续动作链路中检查选中的 `${value}`，如果不符合规则则使用 `update_data` 覆盖回合法值或给出提示。
+  2. 如果必须在交互上限制，可以在 `on_change` 的后续动作链路中检查选中的 `${$value}`，如果不符合规则则使用 `update_data` 覆盖回合法值或给出提示。
 
 **Q: 从后端拉取的时间戳，可以直接绑定到 timepicker 吗？**
 - 不行。`timepicker` 绑定的值必须是与 `format` 相匹配的**字符串**（如 `"09:30"`）。如果后端返回的是时间戳或完整的 ISO 日期格式，请在网络请求（`http_request`）的数据转换层（如 `transformer`）将其格式化为时间字符串后再写入绑定的路径。

@@ -18,13 +18,36 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value.path` | `string` | - | **必填**，双向绑定的数据路径。单选时写回字符串，多选时写回字符串数组 |
-| `options` | `Array \| string` | `[]` | **必填**，树形结构的数据源，支持插值表达式动态获取全局数据 |
-| `multiple` | `boolean \| string` | `false` | 是否支持多选（此时节点前方会出现复选框），支持表达式 |
-| `placeholder` | `string` | - | 选择框的默认提示文字，支持表达式 |
-| `disabled` | `boolean \| string` | `false` | 是否禁用整个树选择器，支持表达式 |
+<!-- contract-props:start -->
+## Form 契约属性（treeselect）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `options` |  | `expression` |  |  |
+| `multiple` |  | 静态值 |  |  |
+| `placeholder` |  | `expression` |  |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（string | number | array | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### options（树形数据源）
 
@@ -178,8 +201,8 @@
 ## 新手常见问题
 
 **Q: 为什么我开启了 `multiple: true`，但是选中的数据格式不对？**
-- 单选时 `${value}` 是字符串（如 `"hr"`）。
-- 多选时 `${value}` 是数组（如 `["hr", "finance"]`）。在初始化 `dataModel` 或者处理后端请求时，请注意这个类型的差异。
+- 单选时 `${$value}` 是字符串（如 `"hr"`）。
+- 多选时 `${$value}` 是数组（如 `["hr", "finance"]`）。在初始化 `dataModel` 或者处理后端请求时，请注意这个类型的差异。
 
 **Q: 多选模式下，勾选父节点会自动勾选所有子节点吗？**
 - 是的，Ant Design 的 TreeSelect 在多选（`treeCheckable`）模式下，父子节点的勾选状态是联动的。勾选父节点等同于全选其下的所有子节点。如果你需要切断这种联动（类似 Tree 组件的 `checkStrictly`），目前 FAUI 的 `treeselect` 暂未开放该底层属性。

@@ -10,14 +10,35 @@
 
 ## 核心属性
 
-| 属性名 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value` | `ValueBinding` | - | 双向绑定的数据路径，用于回显和写入当前的评分数值 |
-| `count` | `number \| string` | `5` | 设置评分的星星总数，支持插值表达式 |
-| `allowHalf` | `boolean \| string` | `false` | 是否允许半星评分，支持插值表达式 |
-| `on_change` | `ActionConfig` | - | 评分发生变化时的回调动作。自定义时可通过 `${$value}` 引用最新值，组件会保留你设置的自定义 `value` 表达式不覆盖。 |
-| `rules` | `FormRule[]` | - | 表单校验规则，支持必填、最大/最小值等校验 |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | 触发校验的时机 |
+<!-- contract-props:start -->
+## Form 契约属性（rate）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `disabled` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 |  |  |
+| `allowHalf` |  | 静态值 |  |  |
+| `count` |  | 静态值 |  |  |
+| `value` |  | `path`, 路径：`root-or-repeater-relative` |  |  |
+| `field` |  | 静态值 | 表单校验字段名；不负责替代 value.path。 |  |
+| `rules` |  | 静态值 |  |  |
+| `validateTrigger` |  | 静态值 |  |  |
+| `on_change` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`none`
+- 事件：`on_change`
+- dataModel 绑定：`value`（number | null）
+- 属性依赖：无
+- 特殊说明：无
+<!-- contract-props:end -->
 
 ### count（星星总数）
 
@@ -88,7 +109,7 @@
 
 ### 纯展示用途
 
-如果只希望展示已有的评分结果而不允许用户修改（或者修改了也不保存），可以仅绑定 `value.path` 并利用表达式禁用它，或者通过外层增加透明遮罩阻止点击。虽然组件本身没有暴露出 `disabled` 属性，但你可以通过不处理回写（且不触发其他动作）来充当一个展示器。
+如果只希望展示已有的评分结果而不允许用户修改，可配置 `disabled: true`，也可使用表达式或数据绑定动态禁用。
 
 ### 带提示文字的联动
 
@@ -142,13 +163,13 @@
     {
       "action": "update_data",
       "path": "/survey/driverScore",
-      "value": "${value}"
+      "value": "${$value}"
     },
     {
       "action": "message",
       "payload": {
         "type": "info",
-        "content": "您给出了 ${value} 星评价"
+        "content": "您给出了 ${$value} 星评价"
       }
     }
   ]

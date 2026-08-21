@@ -18,17 +18,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run check-doc-navigation && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sync-docs": "node scripts/sync-docs.mjs",
-    "sync-docs:check": "node scripts/sync-docs.mjs --check",
+    "sync-docs": "node scripts/sync-docs.mjs && npm run check-doc-navigation",
+    "sync-docs:check": "node scripts/sync-docs.mjs --check && npm run check-doc-navigation",
+    "check-doc-navigation": "node scripts/check-doc-navigation.mjs",
     "check-doc-links": "node scripts/check-doc-links.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@faui/react": "^0.0.5",
-    "@lawlietfeng/faui-agent": "^1.0.2",
+    "@faui/react": "^0.0.6",
+    "@lawlietfeng/faui-agent": "file:../faui-sdk-agent",
     "antd": "5.24.4",
     "axios": "^1.15.0",
     "dayjs": "^1.11.20",

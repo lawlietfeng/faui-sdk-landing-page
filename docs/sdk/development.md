@@ -35,6 +35,7 @@ FAUI 提供了**双入口架构**，以满足不同业务层级的需求：
 
 ### 1.6 组件 Manifest 新鲜度
 - **对外契约**：`src/manifest.ts` 通过 `@faui/react/manifest` 向文档站提供组件能力清单。该模块只能包含静态数据，禁止导入 Renderer、React 或组件运行时依赖。
+- **Form Edition 属性契约**：`@faui/react/manifest` 同时导出 `formComponentContracts` 与 `formSchemaContract`。组件属性表由 `npm run docs:sync-contracts` 生成，Agent 严格校验使用 `node scripts/validate-schema.cjs --mode=form-strict`。
 - **同步范围**：新增、删除、重命名组件，或调整 `FormComponentRegistry`、`ComponentRegistry` 的注册名及可用版本时，必须在同一改动中更新 manifest。
 - **条目完整性**：每个文档组件条目必须包含 `slug`、`title`、`summary`、`category`、`availability` 与完整的 `registryNames`。一个文档页覆盖多个运行时组件时，例如 `grid` 或 `layout`，必须列出全部注册名。
 - **版本与验证**：`manifestVersion` 仅在消费方不兼容时递增。涉及 Registry 或 manifest 的改动，必须保持 `tests/components/registry-contract.test.tsx` 的契约断言有效，并执行 lint、typecheck、test。
@@ -48,9 +49,10 @@ FAUI 提供了**双入口架构**，以满足不同业务层级的需求：
 ### 2.1 数据绑定与状态回写 (Data Binding & State)
 
 - **【路径规范 (JSON Pointer)】**：
-  配置 `path` 绑定全局状态时，**强制使用斜杠 `/` 分割**的 JSON Pointer 格式（如 `"/user/name"`）。严禁使用点号 `"."`，否则底层解析会失败导致状态不更新。
+  根数据模型绑定使用以 `/` 开头的 JSON Pointer（如 `"/user/name"`）。只有 Repeater 模板子树允许 `"./field"` 相对路径；路径对象只能包含 `path`，不使用 `{ "not": ... }`。
 - **【受控组件的 Fallback 机制与 update_data 参数规范】**：
   凡是允许用户输入的受控组件，在触发 `onChange` 时，必须实现**状态自动回写机制**。如果用户未配置 `on_change` 自定义动作，但配置了绑定的 `path`，组件内部必须兜底执行 `update_data` 动作。
+  配置 `on_change` 后保持兼容行为：自定义 action 覆盖默认回写；事件上下文统一使用 `$value`。本期不新增 `on_after_change`。
   **注意参数结构**：使用 `handleAction` 或 `action.execute` 时，`path` 和 `value` 必须位于动作对象的**顶层**，即 `{ action: 'update_data', path: '...', value: '...' }`。**严禁**将它们包裹在 `payload` 对象中（如 `{ action: 'update_data', payload: { path, value } }` 是错误的），否则引擎会抛出 `[warn] update_data action requires path` 警告并中断执行。
 - **【数据类型包容性】**：
   对于支持模式切换（如单选/多选）的组件，组件内部的状态类型声明应具备包容性（如 `any` 或联合类型），并在向底层 UI 组件传递数据时做好安全保护（例如数组模式时强制 fallback 为 `[]`），避免由于类型方法缺失导致渲染崩溃。

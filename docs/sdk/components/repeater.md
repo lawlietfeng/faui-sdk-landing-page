@@ -17,14 +17,33 @@
 
 ## 属性
 
-| 属性 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|--------|------|
-| `data` | `ValueBinding` | 是 | — | 数据源路径，值应为数组 |
-| `children` | `string[]` | 是 | — | 模板子组件 ID，每项重复渲染 |
-| `direction` | `'vertical' \| 'horizontal'` | 否 | `'vertical'` | 排列方向 |
-| `gap` | `number` | 否 | `0` | 项间距（px） |
-| `emptyContent` | `string` | 否 | — | 空数据时的提示文本 |
-| `style` | `CSSProperties` | 否 | — | 容器自定义样式 |
+<!-- contract-props:start -->
+## Form 契约属性（repeater）
+
+| 属性 | 标题 | 动态绑定 | 说明 | 默认值 |
+| --- | --- | --- | --- | --- |
+| `id` |  | 静态值 | 在 schema 中唯一的组件 ID。 |  |
+| `component` |  | 静态值 | Form Registry 注册名。 |  |
+| `data` |  | `path`, 路径：`root` |  |  |
+| `direction` |  | 静态值 |  |  |
+| `gap` |  | 静态值 |  |  |
+| `emptyContent` |  | `expression` | 组件显示的文本内容。 |  |
+| `keyField` |  | 静态值 |  |  |
+| `children` |  | 静态值 |  |  |
+| `name` |  | 静态值 |  |  |
+| `domId` |  | 静态值 |  |  |
+| `style` |  | 静态值 |  |  |
+| `className` |  | 静态值 |  |  |
+| `animation` |  | 静态值 |  |  |
+| `visible` |  | `boolean`, `expression`, `path`, 路径：`root-or-repeater-relative`, 纯表达式 | 控制组件是否渲染。 |  |
+| `on_mount` |  | 静态值 | 组件挂载时执行的 Action。 |  |
+
+- 子节点模式：`template-component-ids`
+- 事件：
+- dataModel 绑定：`data`（array）
+- 属性依赖：无
+- 特殊说明：data.path 使用根路径；模板子组件的可回写绑定可使用 ./field。
+<!-- contract-props:end -->
 
 ## 作用域变量
 
