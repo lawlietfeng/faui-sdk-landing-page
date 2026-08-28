@@ -7,8 +7,7 @@ type Props = {
 };
 
 export const theme = {
-  cssVar: { prefix: 'hire' },
-  hashed: false,
+  hashed: true,
   token: {
     colorPrimary: '#0c9b72',
     colorInfo: '#0c9b72',
