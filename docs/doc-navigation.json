@@ -13,7 +13,8 @@
     { "key": "sdk/actions/update_data", "label": "update_data", "section": "actions" },
     { "key": "sdk/actions/http_proxy", "label": "http_proxy", "section": "actions" },
     { "key": "sdk/actions/message", "label": "message", "section": "actions" },
-    { "key": "sdk/actions/notification", "label": "notification", "section": "actions" }
+    { "key": "sdk/actions/notification", "label": "notification", "section": "actions" },
+    { "key": "sdk/actions/post_message", "label": "post_message", "section": "actions" }
   ],
   "hidden": [
     "sdk/faui-llm-prompt",
