@@ -2,13 +2,12 @@
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { Renderer } from '@faui/react/full';
 import type { ActionConfig, ActivitySnapshot, Content, HttpRequestConfig } from '@faui/react/full';
-import { FauiAgent, TOOL_SYSTEM_PROMPT } from '@lawlietfeng/faui-agent';
+import { FauiAgent } from '@lawlietfeng/faui-agent';
 import type { PageSchema } from '@lawlietfeng/faui-agent';
 import { Input, Button, Tabs, message, Collapse, Modal, Select } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, CopyOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import FauiThemeProvider from '../../setup/theme';
-import sdkSchemaPrompt from '../../../docs/sdk/faui-llm-prompt.md?raw';
 import { validateActivitiesInput } from '../JsonDebug/lib/validateActivities';
 
 interface ChatMessage {
@@ -42,27 +41,6 @@ interface ProviderMeta {
 }
 
 const DEFAULT_PROVIDER = 'openai';
-
-const AGENT_SYSTEM_PROMPT = `${TOOL_SYSTEM_PROMPT}
-
-## SDK Schema 规则（优先）
-
-以下内容来自本地 faui-sdk 的 faui-llm-prompt.md，是组件、字段、Action 和数据绑定规则的唯一来源。
-当它与 Agent 的默认 Schema 语义冲突时，以此规则为准；但继续使用上方的工具调用协议。
-当前预览使用 Full Edition 注册表，因此 table、list、chart 和 animation 配置可用于预览；其字段仍须遵循 SDK 文档。
-
-${sdkSchemaPrompt}
-
-## Agent 工具输出约束（最高优先级）
-
-SDK 文档中的 ActivitySnapshot 数组是宿主最终交给 Renderer 的完整 JSON。Agent 的工具调用只生成其中的 content：
-
-{
-  "components": [...],
-  "dataModel": { ... }
-}
-
-不要在工具参数中嵌套 ACTIVITY_SNAPSHOT 或外层数组；宿主会自动补齐它们。`;
 
 const EXTENDED_ACTION_TYPES = new Set(['copy', 'mcp_tool_call', 'send_prompt', 'input_prompt']);
 
@@ -126,20 +104,6 @@ function normalizeAgentConfig(value: unknown): AgentConfig {
       : defaults.baseUrl,
     uiStylePrompt: typeof saved.uiStylePrompt === 'string' ? saved.uiStylePrompt : defaults.uiStylePrompt,
   };
-}
-
-function buildAgentSystemPrompt(uiStylePrompt: string): string {
-  if (!uiStylePrompt.trim()) return AGENT_SYSTEM_PROMPT;
-
-  return `${AGENT_SYSTEM_PROMPT}
-
-## 用户配置的 UI 页面风格
-
-以下要求只用于控制页面的视觉风格、布局和文案语气。必须在最终工具输出的组件配置中，通过 \`style\` 对象实际实现对应效果，不能只在文字回复中说明。
-\`style\` 使用标准 React 行内 CSS 的驼峰属性，例如 \`backgroundColor\`、\`background\`、\`color\`、\`padding\`、\`border\`、\`borderRadius\`、\`boxShadow\`、\`fontSize\`、\`fontWeight\`、\`lineHeight\`、\`maxWidth\`、\`minHeight\`。不要使用 Tailwind、className、伪类或依赖宿主页面的 CSS。
-优先为根容器和主要区块写背景、留白与尺寸，为表面容器写层级，为标题、正文和按钮写与风格一致的视觉属性。不得改变 SDK Schema、工具调用协议或数据绑定规则。
-
-${uiStylePrompt.trim()}`;
 }
 
 const httpRequest = async (config: HttpRequestConfig) => {
@@ -382,7 +346,7 @@ export default function AgentDemo() {
             apiKey: config.apiKey,
             baseUrl: config.baseUrl || undefined,
             useTools: true,
-            systemPrompt: buildAgentSystemPrompt(config.uiStylePrompt),
+            stylePrompt: config.uiStylePrompt,
           }),
           configKey,
         };
